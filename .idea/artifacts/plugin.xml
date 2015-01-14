@@ -1,0 +1,21 @@
+<component name="ArtifactManager">
+  <artifact name="plugin">
+    <output-path>$PROJECT_DIR$/out/artifacts/plugin</output-path>
+    <properties id="ant-postprocessing">
+      <options enabled="true" />
+    </properties>
+    <root id="root">
+      <element id="directory" name="server">
+        <element id="archive" name="terms-of-service-resources.jar">
+          <element id="directory" name="buildServerResources">
+            <element id="dir-copy" path="$PROJECT_DIR$/resources" />
+          </element>
+        </element>
+        <element id="archive" name="terms-of-service-server.jar">
+          <element id="module-output" name="TermsOfServicePlugin" />
+        </element>
+      </element>
+      <element id="file-copy" path="$PROJECT_DIR$/teamcity-plugin.xml" />
+    </root>
+  </artifact>
+</component>

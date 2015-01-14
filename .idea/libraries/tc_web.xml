@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="tc-web">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/ext/web" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

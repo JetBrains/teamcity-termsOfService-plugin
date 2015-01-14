@@ -1,0 +1,21 @@
+.licensesPage {
+    top: 100px;
+    width: 800px;
+    padding: 1em;
+}
+
+.agreement {
+    width: 750px;
+    height: 550px;
+    overflow: auto;
+    margin: 2em auto;
+}
+
+.agreementForm {
+    width: 750px;
+    margin: auto;
+}
+
+.agreementForm .continueBlock {
+    margin-bottom: 0;
+}
