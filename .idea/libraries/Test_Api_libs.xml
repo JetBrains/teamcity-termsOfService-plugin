@@ -1,7 +1,11 @@
 <component name="libraryTable">
   <library name="Test-Api libs">
     <CLASSES>
-      <root url="file://$TeamCityDistribution$/devPackage/tests" />
+      <root url="jar://$TeamCityDistribution$/devPackage/tests/patches-test.jar!/" />
+      <root url="jar://$TeamCityDistribution$/devPackage/tests/spring-test.jar!/" />
+      <root url="jar://$TeamCityDistribution$/devPackage/tests/testng-6.8.jar!/" />
+      <root url="jar://$TeamCityDistribution$/devPackage/tests/tests-integration.jar!/" />
+      <root url="jar://$TeamCityDistribution$/devPackage/tests/tests-support.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
@@ -473,6 +477,5 @@
       <root url="file://$PROJECT_DIR$/../Perforce/TeamServer/BuildServer/TeamCityArtifactsSizeStatisticsPlugin/src" />
       <root url="file://$PROJECT_DIR$/../Perforce/TeamServer/BuildServer/TeamCityArtifactsSizeStatisticsPlugin/tests" />
     </SOURCES>
-    <jarDirectory url="file://$TeamCityDistribution$/devPackage/tests" recursive="false" />
   </library>
 </component>
