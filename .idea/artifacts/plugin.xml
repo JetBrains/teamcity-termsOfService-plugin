@@ -8,14 +8,14 @@
       <element id="directory" name="server">
         <element id="archive" name="terms-of-service-resources.jar">
           <element id="directory" name="buildServerResources">
-            <element id="dir-copy" path="$PROJECT_DIR$/resources" />
+            <element id="dir-copy" path="$PROJECT_DIR$/server/resources" />
           </element>
         </element>
         <element id="archive" name="terms-of-service-server.jar">
-          <element id="module-output" name="TermsOfServicePlugin" />
+          <element id="module-output" name="server" />
         </element>
       </element>
-      <element id="file-copy" path="$PROJECT_DIR$/teamcity-plugin.xml" />
+      <element id="file-copy" path="$PROJECT_DIR$/server/teamcity-plugin.xml" />
     </root>
   </artifact>
 </component>

@@ -1,7 +1,7 @@
 .licensesPage {
     top: 100px;
     width: 800px;
-    padding: 1em;
+    padding: 1em !important;
 }
 
 .agreement {

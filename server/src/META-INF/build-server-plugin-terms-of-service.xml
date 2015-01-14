@@ -11,7 +11,7 @@
   <bean id="serviceTermsManager" class="jetbrains.buildServer.termsOfService.PropertyBasedManager">
     <constructor-arg>
       <bean class="jetbrains.buildServer.termsOfService.PropertyBasedConfig">
-        <constructor-arg value=".teamcity.termsOfServices.accepted10"/>
+        <constructor-arg value=".teamcity.termsOfServices.accepted"/>
         <constructor-arg value="/termsOfService.html"/>
       </bean>
     </constructor-arg>
