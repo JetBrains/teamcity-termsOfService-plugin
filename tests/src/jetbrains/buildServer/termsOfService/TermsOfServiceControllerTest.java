@@ -8,7 +8,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class PluginControllerTest extends BaseControllerTestCase {
+public class TermsOfServiceControllerTest extends BaseControllerTestCase {
 
     private PropertyBasedConfig myConfig;
 
