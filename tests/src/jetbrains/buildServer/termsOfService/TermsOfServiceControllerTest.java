@@ -4,7 +4,6 @@ package jetbrains.buildServer.termsOfService;
 import jetbrains.buildServer.controllers.AuthorizationInterceptor;
 import jetbrains.buildServer.controllers.BaseController;
 import jetbrains.buildServer.controllers.BaseControllerTestCase;
-import jetbrains.buildServer.controllers.overview.OverviewController;
 import jetbrains.buildServer.serverSide.MockServerPluginDescriptior;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
