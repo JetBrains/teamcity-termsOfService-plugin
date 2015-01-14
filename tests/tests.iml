@@ -10,19 +10,13 @@
     <orderEntry type="library" name="Test-Api" level="project" />
     <orderEntry type="library" name="Test-Api libs" level="project" />
     <orderEntry type="library" scope="TEST" name="testng" level="project" />
-    <orderEntry type="library" name="Agent-Api" level="project" />
-    <orderEntry type="library" name="Agent-internal" level="project" />
+    <orderEntry type="module" module-name="server" />
     <orderEntry type="library" name="Common-Api" level="project" />
     <orderEntry type="library" name="Common-Impl" level="project" />
     <orderEntry type="library" name="idea annotations.jar" level="project" />
     <orderEntry type="library" name="Idea-OpenApi" level="project" />
     <orderEntry type="library" name="jmock" level="project" />
     <orderEntry type="library" name="log4j" level="project" />
-    <orderEntry type="library" name="Server-Api" level="project" />
-    <orderEntry type="library" name="Servlet Api" level="project" />
-    <orderEntry type="library" name="standard.jar" level="project" />
-    <orderEntry type="library" name="TeamCity agent runtime" level="project" />
     <orderEntry type="library" name="TeamCity server runtime" level="project" />
-    <orderEntry type="module" module-name="server" />
   </component>
 </module>

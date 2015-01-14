@@ -1,26 +1,18 @@
 package jetbrains.buildServer.termsOfService;
 
 
-import jetbrains.buildServer.controllers.AuthorizationInterceptor;
 import jetbrains.buildServer.controllers.BaseController;
 import jetbrains.buildServer.controllers.BaseControllerTestCase;
 import jetbrains.buildServer.serverSide.MockServerPluginDescriptior;
 import jetbrains.buildServer.users.SUser;
-import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.springframework.web.servlet.ModelAndView;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import javax.servlet.ServletContext;
 
 public class TermsOfServiceControllerTest extends BaseControllerTestCase {
 
-    private AuthorizationInterceptor auth;
-    private WebControllerManager web;
-    private ServletContext context;
-    private long myRequestDate;
     private PropertyBasedConfig myConfig;
-
 
     @Override
     protected BaseController createController() {
