@@ -1,21 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-               http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"
+               http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
        default-autowire="constructor">
 
-  <bean class="jetbrains.buildServer.termsOfService.TermsOfServiceHandlerInterceptor" lazy-init="false"/>
+    <bean class="jetbrains.buildServer.termsOfService.TermsOfServiceHandlerInterceptor" lazy-init="false">
+        <constructor-arg ref="userServiceTermsManager"/>
+    </bean>
+
+    <bean class="jetbrains.buildServer.termsOfService.TermsOfServiceHandlerInterceptor" lazy-init="false">
+        <constructor-arg ref="pmServiceTermsManager"/>
+    </bean>
+
+    <bean id="userServiceTermsController" class="jetbrains.buildServer.termsOfService.TermsOfServiceController">
+        <constructor-arg index="3" ref="userServiceTermsManager"/>
+    </bean>
+
+    <bean id="pmServiceTermsController" class="jetbrains.buildServer.termsOfService.TermsOfServiceController">
+        <constructor-arg index="3" ref="pmServiceTermsManager"/>
+    </bean>
+
+    <bean id="userServiceTermsManager" class="jetbrains.buildServer.termsOfService.PropertyBasedManager">
+        <constructor-arg>
+            <bean class="jetbrains.buildServer.termsOfService.PropertyBasedConfig">
+                <constructor-arg value=".teamcity.userTermsOfServices.accepted"/>
+                <constructor-arg value="User Terms of Service"/>
+                <constructor-arg value="/userTerms.html"/>
+                <constructor-arg value="_text.jspf"/>
+            </bean>
+        </constructor-arg>
+        <constructor-arg>
+            <util:constant static-field="jetbrains.buildServer.termsOfService.TermsOfServiceUtil.ANY_USER"/>
+        </constructor-arg>
+    </bean>
 
 
-  <bean id="serviceTermsManager" class="jetbrains.buildServer.termsOfService.PropertyBasedManager">
-    <constructor-arg>
-      <bean class="jetbrains.buildServer.termsOfService.PropertyBasedConfig">
-        <constructor-arg value=".teamcity.termsOfServices.accepted"/>
-        <constructor-arg value="/termsOfService.html"/>
-      </bean>
-    </constructor-arg>
-  </bean>
+    <bean id="pmServiceTermsManager" class="jetbrains.buildServer.termsOfService.PropertyBasedManager">
+        <constructor-arg>
+            <bean class="jetbrains.buildServer.termsOfService.PropertyBasedConfig">
+                <constructor-arg value=".teamcity.pmTermsOfServices.accepted"/>
+                <constructor-arg value="Project Manager Terms of Service"/>
+                <constructor-arg value="/pmTerms.html"/>
+                <constructor-arg value="_pm_text.jspf"/>
+            </bean>
+        </constructor-arg>
+        <constructor-arg>
+            <util:constant static-field="jetbrains.buildServer.termsOfService.TermsOfServiceUtil.PROJECT_MANAGER"/>
+        </constructor-arg>
+    </bean>
 
-  <bean id="serviceTermsController" class="jetbrains.buildServer.termsOfService.TermsOfServiceController"/>
+
 </beans>

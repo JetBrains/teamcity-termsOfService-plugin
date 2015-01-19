@@ -1,28 +1,41 @@
 package jetbrains.buildServer.termsOfService;
 
+import jetbrains.buildServer.serverSide.auth.Permission;
+import jetbrains.buildServer.serverSide.auth.Permissions;
 import jetbrains.buildServer.users.SUser;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
+
 public class PropertyBasedManager implements TermsOfServiceManager {
 
-  @NotNull
-  private final PropertyBasedConfig myConfig;
+    @NotNull
+    private final PropertyBasedConfig myConfig;
+    @NotNull
+    private UserCondition myCondition;
 
-  public PropertyBasedManager(final @NotNull PropertyBasedConfig config) {
-    myConfig = config;
-  }
 
-  @NotNull
-  public TermsOfServiceConfig getConfig() {
-    return myConfig;
-  }
+    public PropertyBasedManager(final @NotNull PropertyBasedConfig config, final @NotNull UserCondition condition) {
+        myConfig = config;
+        myCondition = condition;
+    }
 
-  public boolean isAccepted(@NotNull final SUser user) {
-    return user.getBooleanProperty(myConfig.getKey());
-  }
+    @NotNull
+    public TermsOfServiceConfig getConfig() {
+        return myConfig;
+    }
 
-  public void accept(@NotNull final SUser user) {
-    user.setUserProperty(myConfig.getKey(),"true");
-  }
+    public boolean isAccepted(@NotNull final SUser user) {
+        return user.getBooleanProperty(myConfig.getKey());
+    }
+
+    @Override
+    public boolean shouldAccept(@NotNull SUser user) {
+        return myCondition.shouldAccept(user);
+    }
+
+    public void accept(@NotNull final SUser user) {
+        user.setUserProperty(myConfig.getKey(), "true");
+    }
 
 }

@@ -10,5 +10,7 @@ public interface TermsOfServiceManager {
 
   boolean isAccepted(@NotNull SUser user);
 
+  boolean shouldAccept(@NotNull SUser user);
+
   void accept(@NotNull SUser user);
 }

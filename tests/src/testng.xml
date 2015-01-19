@@ -3,6 +3,7 @@
     <test name="PLUGIN tests">
         <classes>
             <class name="jetbrains.buildServer.termsOfService.TermsOfServiceControllerTest"/>
+            <class name="jetbrains.buildServer.termsOfService.ProjectManagerTermsOfServiceControllerTest"/>
         </classes>
     </test>
 </suite>

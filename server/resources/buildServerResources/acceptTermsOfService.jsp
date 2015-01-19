@@ -11,10 +11,10 @@
     </bs:linkCSS>
   </jsp:attribute>
   <jsp:attribute name="body_include">
-    <c:set var="name" value="Terms of Service"/>
+    <c:set var="name" value="${termsOfServiceName}"/>
     <div class="licensesPage">
       <div class="agreement">
-        <jsp:include page="_text.jspf"/>
+        <jsp:include page="${contentFile}"/>
       </div>
       <div class="agreementForm clearfix">
         <p>You must accept the ${name} to proceed.</p>
