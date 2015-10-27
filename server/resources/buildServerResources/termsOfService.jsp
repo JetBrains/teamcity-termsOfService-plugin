@@ -6,7 +6,6 @@
   <jsp:attribute name="head_include">
     <bs:linkCSS>
       /css/initialPages.css
-      serviceTerms.css
     </bs:linkCSS>
   </jsp:attribute>
   <jsp:attribute name="body_include">

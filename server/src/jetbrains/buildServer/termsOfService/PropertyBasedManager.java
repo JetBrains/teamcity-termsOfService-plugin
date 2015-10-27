@@ -1,11 +1,7 @@
 package jetbrains.buildServer.termsOfService;
 
-import jetbrains.buildServer.serverSide.auth.Permission;
-import jetbrains.buildServer.serverSide.auth.Permissions;
 import jetbrains.buildServer.users.SUser;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Map;
 
 public class PropertyBasedManager implements TermsOfServiceManager {
 

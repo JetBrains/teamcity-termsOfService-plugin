@@ -2,6 +2,7 @@ package jetbrains.buildServer.termsOfService;
 
 
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.util.text.StringUtil;
 import jetbrains.buildServer.controllers.interceptors.TeamCityHandlerInterceptor;
 import jetbrains.buildServer.controllers.login.RememberUrl;
 import jetbrains.buildServer.users.SUser;
@@ -15,7 +16,9 @@ import javax.servlet.http.HttpServletResponse;
 public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerInterceptor {
 
     private static final Logger LOG = Logger.getInstance(TermsOfServiceHandlerInterceptor.class.getName());
-    private static final String ENTRY_POINT_PREFIX = "/termsOfServices";
+    protected static final String ENTRY_POINT_PREFIX = "/termsOfServices";
+    private static final String AJAX_PREFIX = "/ajax.html";
+    private static final String LOGOUT_PARAMETER = "logout";
 
     @NotNull
     private final TermsOfServiceManager myManager;
@@ -33,6 +36,10 @@ public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerIntercep
 
         String path = WebUtil.getPathWithoutContext(request);
         LOG.debug("path=" + path);
+
+        if (path.startsWith(AJAX_PREFIX)){
+            return true;
+        }
 
         SUser user = SessionUser.getUser(request);
         if (user == null) {

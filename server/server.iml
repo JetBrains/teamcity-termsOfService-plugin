@@ -30,5 +30,6 @@
     <orderEntry type="library" name="standard.jar" level="project" />
     <orderEntry type="library" name="TeamCity agent runtime" level="project" />
     <orderEntry type="library" name="TeamCity server runtime" level="project" />
+    <orderEntry type="module" module-name="idea-resolve-helper" />
   </component>
 </module>

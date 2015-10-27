@@ -3,6 +3,7 @@ package jetbrains.buildServer.termsOfService;
 import jetbrains.buildServer.users.PropertyKey;
 import jetbrains.buildServer.users.SimplePropertyKey;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class PropertyBasedConfig implements TermsOfServiceConfig {
     @NotNull
@@ -14,7 +15,6 @@ public class PropertyBasedConfig implements TermsOfServiceConfig {
     @NotNull
     private final String myName;
 
-
     public PropertyBasedConfig(final @NotNull String key,
                                final @NotNull String name,
                                final @NotNull String entryPoint,
@@ -24,6 +24,7 @@ public class PropertyBasedConfig implements TermsOfServiceConfig {
         myContentFile = contentFile;
         myPath = entryPoint;
     }
+
 
     @NotNull
     public PropertyKey getKey() {
@@ -44,5 +45,6 @@ public class PropertyBasedConfig implements TermsOfServiceConfig {
     public String getName() {
         return myName;
     }
+
 }
 

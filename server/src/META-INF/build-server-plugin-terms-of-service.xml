@@ -17,7 +17,7 @@
         <constructor-arg index="3" ref="userServiceTermsManager"/>
     </bean>
 
-    <bean id="pmServiceTermsController" class="jetbrains.buildServer.termsOfService.TermsOfServiceController">
+    <bean id="pmServiceTermsController" class="jetbrains.buildServer.termsOfService.ProjectAdminTermsOfServiceController">
         <constructor-arg index="3" ref="pmServiceTermsManager"/>
     </bean>
 
@@ -31,7 +31,7 @@
             </bean>
         </constructor-arg>
         <constructor-arg>
-            <util:constant static-field="jetbrains.buildServer.termsOfService.TermsOfServiceUtil.ANY_USER"/>
+            <util:constant static-field="jetbrains.buildServer.termsOfService.TermsOfServiceUtil.ANY_USER_NO_GUEST"/>
         </constructor-arg>
     </bean>
 
@@ -46,7 +46,17 @@
             </bean>
         </constructor-arg>
         <constructor-arg>
-            <util:constant static-field="jetbrains.buildServer.termsOfService.TermsOfServiceUtil.PROJECT_MANAGER"/>
+            <util:constant static-field="jetbrains.buildServer.termsOfService.TermsOfServiceUtil.PROJECT_MANAGER_NO_GUEST"/>
+        </constructor-arg>
+    </bean>
+
+
+    <bean class="jetbrains.buildServer.termsOfService.TermsOfServicesLink">
+        <constructor-arg index="0">
+            <util:list>
+                <ref bean="userServiceTermsManager"/>
+                <ref bean="pmServiceTermsManager"/>
+            </util:list>
         </constructor-arg>
     </bean>
 

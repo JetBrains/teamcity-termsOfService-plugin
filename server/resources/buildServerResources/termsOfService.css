@@ -6,8 +6,6 @@
 
 .agreement {
     width: 750px;
-    height: 550px;
-    overflow: auto;
     margin: 2em auto;
 }
 
@@ -18,4 +16,12 @@
 
 .agreementForm .continueBlock {
     margin-bottom: 0;
+}
+
+.roleName, .projectName{
+    font-style: italic;
+}
+
+.licenseAgreementLink{
+    display: block;
 }

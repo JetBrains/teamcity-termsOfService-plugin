@@ -15,7 +15,7 @@ public class TermsOfServiceControllerTest extends BaseControllerTestCase {
     @Override
     protected BaseController createController() {
         myConfig = new PropertyBasedConfig("property1", "User Terms of Service","_for_users.html", "_text.jspf");
-        PropertyBasedManager manager = new PropertyBasedManager(myConfig, TermsOfServiceUtil.ANY_USER);
+        PropertyBasedManager manager = new PropertyBasedManager(myConfig, TermsOfServiceUtil.ANY_USER_NO_GUEST);
         myController = new TermsOfServiceController(myServer, myWebManager,
                 new MockServerPluginDescriptior(),
                 manager);
