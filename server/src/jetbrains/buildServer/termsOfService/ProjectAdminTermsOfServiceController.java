@@ -2,18 +2,11 @@ package jetbrains.buildServer.termsOfService;
 
 import jetbrains.buildServer.controllers.admin.AdminPermissionsUtil;
 import jetbrains.buildServer.serverSide.SBuildServer;
-import jetbrains.buildServer.serverSide.SProject;
-import jetbrains.buildServer.serverSide.auth.AuthUtil;
-import jetbrains.buildServer.serverSide.auth.Permission;
-import jetbrains.buildServer.serverSide.auth.RoleScope;
 import jetbrains.buildServer.users.impl.UserEx;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.servlet.ModelAndView;
-
-import java.util.Collections;
-import java.util.List;
 
 public class ProjectAdminTermsOfServiceController extends TermsOfServiceController {
 
@@ -33,7 +26,7 @@ public class ProjectAdminTermsOfServiceController extends TermsOfServiceControll
     protected ModelAndView doGet(@NotNull UserEx user) {
         ModelAndView mv = super.doGet(user);
         mv.getModel().put("descriptionFile","projectAdminDescription.jsp");
-        mv.getModel().put("projects", myAdminPermissionsUtil.getProjectsWithPermission(Permission.EDIT_PROJECT));
+        mv.getModel().put("projects", myAdminPermissionsUtil.getAllEditableProjects());
         return mv;
     }
 }
