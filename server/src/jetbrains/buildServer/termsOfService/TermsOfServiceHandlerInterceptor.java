@@ -17,7 +17,6 @@ public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerIntercep
 
     private static final Logger LOG = Logger.getInstance(TermsOfServiceHandlerInterceptor.class.getName());
     protected static final String ENTRY_POINT_PREFIX = "/termsOfServices";
-    private static final String AJAX_PREFIX = "/ajax.html";
     private static final String LOGOUT_PARAMETER = "logout";
 
     @NotNull
@@ -37,7 +36,7 @@ public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerIntercep
         String path = WebUtil.getPathWithoutContext(request);
         LOG.debug("path=" + path);
 
-        if (path.startsWith(AJAX_PREFIX)){
+        if(WebUtil.isAjaxRequest(request)){
             return true;
         }
 
