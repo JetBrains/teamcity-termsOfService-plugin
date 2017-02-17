@@ -49,11 +49,11 @@ public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerIntercep
             return true;
         }
 
-        String entryPoint = getEntryPoint(myManager.getConfig().getPath());
-
         if (!path.startsWith(ENTRY_POINT_PREFIX)) {
-            LOG.debug("Will redirect to " + entryPoint);
-            RememberUrl.remember(request, path);
+            String requestUrl = WebUtil.getRequestUrl(request);
+            String entryPoint = getEntryPoint(myManager.getConfig().getPath());
+            LOG.debug(String.format("Will redirect to %s. Remembered original request url %s", entryPoint, requestUrl));
+            RememberUrl.remember(request, requestUrl);
             response.sendRedirect(request.getContextPath() + entryPoint);
             return false;
         }
