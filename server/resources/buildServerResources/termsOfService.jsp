@@ -12,20 +12,23 @@
     <bs:linkCSS>
       /css/forms.css
       /css/initialPages.css
+      /css/maintenance-initialPages-common.css
       ${teamcityPluginResourcesPath}/termsOfService.css
     </bs:linkCSS>
   </jsp:attribute>
   <jsp:attribute name="body_include">
+    <bs:_loginPageDecoration id="agreementPage" title="${name}">
     <c:set var="name" value="${termsOfServiceName}"/>
-    <div class="licensesPage">
-      <c:if test="${not empty descriptionFile}">
-        <div class="description">
-          <jsp:include page="${descriptionFile}"/>
-        </div>
-      </c:if>
+    <div class="agreementPage">
       <div class="agreement">
+        <c:if test="${not empty descriptionFile}">
+          <div class="description">
+            <jsp:include page="${descriptionFile}"/>
+          </div>
+        </c:if>
         <jsp:include page="${contentFile}"/>
       </div>
     </div>
+    </bs:_loginPageDecoration>
   </jsp:attribute>
 </bs:externalPage>
