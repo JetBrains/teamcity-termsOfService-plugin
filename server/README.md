@@ -1,5 +1,7 @@
 ## TeamCity Terms Of Services plugin
 
+ATTENTION! Please read carefully the whole text below. Any changes in the plugin can affect __TeamCity Test Drive__ project. 
+
 By default every TeamCity installation requires the server administrator only to read and accept one main license agreement. With this plugin TeamCity installation supports additional license agreement (terms of services, any other information) that should be read and accepted by specific kind of TeamCity server users before they can interact with the service any further. 
 The plugin can be installed from the very beginning of the server existence or added any time later.
 As soon as plugin is installed to the server any user targeted by plugin configuration will be redirected to specific page with the text of license agreement before she will be able to perform any further actions.
@@ -17,6 +19,9 @@ If you need the plugin for the specific TeamCity installation
 * install the plugin to the TeamCity server 
 
 Please note: once the plugin is built there is no options to change plugin configuration.
+
+Attention! Branch 'master' contains plugin configuration and license agreements texts required for __TeamCity Test Drive__ project. Don't change anything until you a re sure the project will not be hurt.
+
 
 ## Under The Hood
 
