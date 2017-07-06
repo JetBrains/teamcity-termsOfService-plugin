@@ -14,7 +14,7 @@ public class TermsOfServiceControllerTest extends BaseControllerTestCase {
 
     @Override
     protected BaseController createController() {
-        myConfig = new PropertyBasedConfig("property1", "User Terms of Service","_for_users.html", "_text.jspf");
+        myConfig = new PropertyBasedConfig("property1", "Terms of Service","_for_users.html", "_text.jspf");
         PropertyBasedManager manager = new PropertyBasedManager(myConfig, TermsOfServiceUtil.ANY_USER_NO_GUEST);
         myController = new TermsOfServiceController(myServer, myWebManager,
                 new MockServerPluginDescriptior(),
@@ -45,7 +45,7 @@ public class TermsOfServiceControllerTest extends BaseControllerTestCase {
         Assert.assertNotNull(modelAndView);
         Assert.assertEquals(modelAndView.getViewName(), TermsOfServiceController.ACCEPT_TERMS_OF_SERVICE_JSP);
         Assert.assertEquals(modelAndView.getModel().get("contentFile"), "_text.jspf");
-        Assert.assertEquals(modelAndView.getModel().get("termsOfServiceName"), "User Terms of Service");
+        Assert.assertEquals(modelAndView.getModel().get("termsOfServiceName"), "Terms of Service");
     }
 
     @Test
