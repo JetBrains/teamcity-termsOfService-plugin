@@ -2,9 +2,9 @@ package jetbrains.buildServer.termsOfService;
 
 
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.util.text.StringUtil;
 import jetbrains.buildServer.controllers.interceptors.TeamCityHandlerInterceptor;
 import jetbrains.buildServer.controllers.login.RememberUrl;
+import jetbrains.buildServer.serverSide.TeamCityProperties;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.web.util.SessionUser;
 import jetbrains.buildServer.web.util.WebUtil;
@@ -18,6 +18,7 @@ public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerIntercep
     private static final Logger LOG = Logger.getInstance(TermsOfServiceHandlerInterceptor.class.getName());
     protected static final String ENTRY_POINT_PREFIX = "/termsOfServices";
     private static final String LOGOUT_PARAMETER = "logout";
+    private static final String TEAMCITY_TERMS_OF_SERVICE_ENABLED_PROPERTY = "teamcity.termsOfService.enabled";
 
     @NotNull
     private final TermsOfServiceManager myManager;
@@ -45,7 +46,7 @@ public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerIntercep
             return true;
         }
 
-        if (!myManager.shouldAccept(user) || myManager.isAccepted(user)) {
+        if (!TeamCityProperties.getBoolean(TEAMCITY_TERMS_OF_SERVICE_ENABLED_PROPERTY) || !myManager.shouldAccept(user) || myManager.isAccepted(user)) {
             return true;
         }
 
