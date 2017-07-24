@@ -66,7 +66,7 @@ public class TermsOfServiceController extends BaseController {
                 myResourcesPath + ACCEPT_TERMS_OF_SERVICE_JSP :
                 myResourcesPath + TERMS_OF_SERVICE_JSP);
         view.addObject("contentFile", myManager.getConfig().getContentFile());
-        view.addObject("termsOfServiceName", myManager.getConfig().getName());
+        view.addObject("termsOfServiceName", myManager.getConfig().getFullDisplayName());
         return view;
     }
 

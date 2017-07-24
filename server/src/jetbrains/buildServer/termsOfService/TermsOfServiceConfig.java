@@ -2,8 +2,9 @@ package jetbrains.buildServer.termsOfService;
 
 
 public interface TermsOfServiceConfig {
+  String getShortDisplayName();
 
-  String getName();
+  String getFullDisplayName();
 
   String getContentFile();
 

@@ -5,7 +5,7 @@
     <c:forEach items="${termsOfServices}" var="ts" varStatus="tsStatus">
         <br/>
         <c:url var="url" value="${entryPointPrefix}${ts.config.path}"/>
-        <a href="${url}" onclick="BS.Util.popupWindow('${url}', 'agreement${tsStatus.index}'); return false" class="licenseAgreementLink" type="">${ts.config.name}</a>
+        <a href="${url}" onclick="BS.Util.popupWindow('${url}', 'agreement${tsStatus.index}'); return false" class="licenseAgreementLink" type="">${ts.config.shortDisplayName}</a>
     </c:forEach>
 </div>
 <script type="text/javascript">

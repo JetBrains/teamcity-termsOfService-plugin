@@ -13,7 +13,7 @@ public class ProjectManagerTermsOfServiceControllerTest extends BaseControllerTe
 
     @Override
     protected BaseController createController() {
-        PropertyBasedConfig myConfig = new PropertyBasedConfig("property1", "Project Manager Terms of Service", "/pmTermsOfService.html", "_pm_text.jspf");
+        PropertyBasedConfig myConfig = new PropertyBasedConfig("property1", "PM Terms of Service", "Project Manager Terms of Service", "/pmTermsOfService.html", "_pm_text.jspf");
         PropertyBasedManager manager = new PropertyBasedManager(myConfig, TermsOfServiceUtil.PROJECT_MANAGER_NO_GUEST);
         myController = new TermsOfServiceController(myServer, myWebManager,
                 new MockServerPluginDescriptior(),
