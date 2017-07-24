@@ -17,7 +17,7 @@
         <constructor-arg>
             <bean class="jetbrains.buildServer.termsOfService.PropertyBasedConfig">
                 <constructor-arg value=".teamcity.userTermsOfServices.accepted"/>
-                <constructor-arg value="Terms of Service"/>
+                <constructor-arg value="Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)"/>
                 <constructor-arg value="/userTerms.html"/>
                 <constructor-arg value="_text.jspf"/>
             </bean>
