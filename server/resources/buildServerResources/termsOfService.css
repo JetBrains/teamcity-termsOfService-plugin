@@ -21,3 +21,12 @@
 .licenseAgreementLink {
     display: block;
 }
+
+#pageContent .agreement p+h1 {
+    padding-top: 0.6em;
+    font-size: 200%;
+}
+
+#pageContent .agreement p+h1:first-of-type {
+    padding-top: 0;
+}
