@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="tests">
+    <CLASSES>
+      <root url="file://$TeamCityDistribution$/devPackage/tests" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="file://$TeamCityDistribution$/devPackage/tests" recursive="false" />
+  </library>
+</component>
