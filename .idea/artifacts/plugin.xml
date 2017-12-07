@@ -9,9 +9,6 @@
     </properties>
     <root id="root">
       <element id="directory" name="server">
-        <element id="archive" name="terms-of-service-resources.jar">
-          <element id="dir-copy" path="$PROJECT_DIR$/server/resources" />
-        </element>
         <element id="archive" name="terms-of-service-server.jar">
           <element id="module-output" name="server" />
         </element>
