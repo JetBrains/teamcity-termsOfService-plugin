@@ -4,19 +4,36 @@ import jetbrains.buildServer.controllers.BaseController;
 import jetbrains.buildServer.controllers.BaseControllerTestCase;
 import jetbrains.buildServer.serverSide.MockServerPluginDescriptior;
 import jetbrains.buildServer.users.SUser;
+import jetbrains.buildServer.util.FileUtil;
 import org.springframework.web.servlet.ModelAndView;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.io.File;
 
 public class TermsOfServiceControllerTest extends BaseControllerTestCase {
 
     private PropertyBasedConfig myConfig;
 
+    private File myAgreementFile;
+    @Override
+    @BeforeMethod
+    public void setUp() throws Exception {
+        super.setUp();
+        File config = new File(myFixture.getServerPaths().getConfigDir(), "termsOfService");
+        myAgreementFile = new File(config, "agreement.html");
+        FileUtil.createIfDoesntExist(myAgreementFile);
+        FileUtil.writeFile(myAgreementFile, "Agreement", "UTF-8");
+    }
+
     @Override
     protected BaseController createController() {
-        myConfig = new PropertyBasedConfig("property1", "Terms of Service","Terms of Service","_for_users.html", "_text.jspf");
+        myConfig = new PropertyBasedConfig("property1", "Terms of Service","Terms of Service",
+                "_for_users.html","agreement.html",
+                myFixture.getServerPaths());
         PropertyBasedManager manager = new PropertyBasedManager(myConfig, TermsOfServiceUtil.ANY_USER_NO_GUEST);
-        myController = new TermsOfServiceController(myServer, myWebManager,
+        myController = new TermsOfServiceController(myWebManager,
                 new MockServerPluginDescriptior(),
                 manager);
         return myController;
@@ -44,7 +61,7 @@ public class TermsOfServiceControllerTest extends BaseControllerTestCase {
         ModelAndView modelAndView = doGet();
         Assert.assertNotNull(modelAndView);
         Assert.assertEquals(modelAndView.getViewName(), TermsOfServiceController.ACCEPT_TERMS_OF_SERVICE_JSP);
-        Assert.assertEquals(modelAndView.getModel().get("contentFile"), "_text.jspf");
+        Assert.assertEquals(modelAndView.getModel().get("agreementText"), FileUtil.readText(myAgreementFile, "UTF-8"));
         Assert.assertEquals(modelAndView.getModel().get("termsOfServiceName"), "Terms of Service");
     }
 

@@ -2,7 +2,7 @@
 <%@include file="/include-internal.jsp"%>
 <%--@elvariable id="pageUrl" type="java.lang.String"--%>
 <%--@elvariable id="descriptionFile" type="java.lang.String"--%>
-<%--@elvariable id="contentFile" type="java.lang.String"--%>
+<%--@elvariable id="agreementText" type="java.lang.String"--%>
 <%--@elvariable id="termsOfServiceName" type="java.lang.String"--%>
 <c:set var="name" value="${termsOfServiceName}"/>
 <c:set var="pageTitle" value="${name}"/>
@@ -25,7 +25,7 @@
             <jsp:include page="${descriptionFile}"/>
           </div>
         </c:if>
-        <jsp:include page="${contentFile}"/>
+        ${agreementText}
       </div>
       <div class="agreementForm clearfix">
         <p>You must accept the ${name} to proceed.</p>

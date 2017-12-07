@@ -5,17 +5,35 @@ import jetbrains.buildServer.controllers.BaseControllerTestCase;
 import jetbrains.buildServer.serverSide.MockServerPluginDescriptior;
 import jetbrains.buildServer.serverSide.auth.*;
 import jetbrains.buildServer.users.SUser;
+import jetbrains.buildServer.util.FileUtil;
 import org.springframework.web.servlet.ModelAndView;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.io.File;
 
 public class ProjectManagerTermsOfServiceControllerTest extends BaseControllerTestCase {
 
+    private File myAgreementFile;
+    @Override
+    @BeforeMethod
+    public void setUp() throws Exception {
+        super.setUp();
+        File config = new File(myFixture.getServerPaths().getConfigDir(), "termsOfService");
+        myAgreementFile = new File(config, "agreement.html");
+        FileUtil.createIfDoesntExist(myAgreementFile);
+        FileUtil.writeFile(myAgreementFile, "Agreement", "UTF-8");
+    }
+
     @Override
     protected BaseController createController() {
-        PropertyBasedConfig myConfig = new PropertyBasedConfig("property1", "PM Terms of Service", "Project Manager Terms of Service", "/pmTermsOfService.html", "_pm_text.jspf");
+        PropertyBasedConfig myConfig = new PropertyBasedConfig("property1", "PM Terms of Service",
+                "Project Manager Terms of Service", "/pmTermsOfService.html",
+                "agreement.html",
+                myFixture.getServerPaths());
         PropertyBasedManager manager = new PropertyBasedManager(myConfig, TermsOfServiceUtil.PROJECT_MANAGER_NO_GUEST);
-        myController = new TermsOfServiceController(myServer, myWebManager,
+        myController = new TermsOfServiceController(myWebManager,
                 new MockServerPluginDescriptior(),
                 manager);
         return myController;
@@ -48,7 +66,7 @@ public class ProjectManagerTermsOfServiceControllerTest extends BaseControllerTe
         ModelAndView modelAndView = doGet();
         Assert.assertNotNull(modelAndView);
         Assert.assertEquals(modelAndView.getViewName(), TermsOfServiceController.ACCEPT_TERMS_OF_SERVICE_JSP);
-        Assert.assertEquals(modelAndView.getModel().get("contentFile"), "_pm_text.jspf");
+        Assert.assertEquals(modelAndView.getModel().get("agreementText"), FileUtil.readText(myAgreementFile, "UTF-8"));
         Assert.assertEquals(modelAndView.getModel().get("termsOfServiceName"), "Project Manager Terms of Service");
     }
 

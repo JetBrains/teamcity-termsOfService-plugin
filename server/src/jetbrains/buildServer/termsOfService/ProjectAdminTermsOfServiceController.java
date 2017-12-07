@@ -18,7 +18,7 @@ public class ProjectAdminTermsOfServiceController extends TermsOfServiceControll
                                                 @NotNull PluginDescriptor descriptor,
                                                 @NotNull TermsOfServiceManager manager,
                                                 @NotNull  AdminPermissionsUtil adminPermissionsUtil) {
-        super(server, webControllerManager, descriptor, manager);
+        super(webControllerManager, descriptor, manager);
         myAdminPermissionsUtil = adminPermissionsUtil;
     }
 

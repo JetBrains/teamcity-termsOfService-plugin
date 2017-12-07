@@ -1,10 +1,8 @@
 package jetbrains.buildServer.termsOfService;
 
-import com.intellij.openapi.diagnostic.Logger;
 import jetbrains.buildServer.controllers.BaseController;
 import jetbrains.buildServer.controllers.login.RememberUrl;
 import jetbrains.buildServer.controllers.overview.OverviewController;
-import jetbrains.buildServer.serverSide.SBuildServer;
 import jetbrains.buildServer.users.impl.UserEx;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
@@ -18,24 +16,21 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+import static jetbrains.buildServer.termsOfService.TermsOfServiceManager.LOGGER;
+
 public class TermsOfServiceController extends BaseController {
 
-    private static final Logger LOG = Logger.getInstance(TermsOfServiceController.class.getName());
     protected static final String ACCEPT_TERMS_OF_SERVICE_JSP = "acceptTermsOfService.jsp";
     protected static final String TERMS_OF_SERVICE_JSP = "termsOfService.jsp";
 
-    @NotNull
-    private final SBuildServer myServer;
     @NotNull
     private final String myResourcesPath;
     @NotNull
     private final TermsOfServiceManager myManager;
 
-    public TermsOfServiceController(@NotNull SBuildServer server,
-                                    @NotNull WebControllerManager webControllerManager,
-                                    @NotNull final PluginDescriptor descriptor,
+    public TermsOfServiceController(@NotNull WebControllerManager webControllerManager,
+                                    @NotNull PluginDescriptor descriptor,
                                     @NotNull TermsOfServiceManager manager) {
-        myServer = server;
         myManager = manager;
         webControllerManager.registerController(TermsOfServiceHandlerInterceptor.getEntryPoint(myManager.getConfig().getPath()), this);
         myResourcesPath = descriptor.getPluginResourcesPath();
@@ -46,11 +41,11 @@ public class TermsOfServiceController extends BaseController {
     protected ModelAndView doHandle(@NotNull final HttpServletRequest request, @NotNull final HttpServletResponse response) throws Exception {
         UserEx user = (UserEx) SessionUser.getUser(request);
         if (user == null) {
-            LOG.warn("User is set to null. TermsOfServiceController should not be executed.");
+            LOGGER.warn("User is set to null. TermsOfServiceController should not be executed.");
             return null;
         }
         if (!myManager.shouldAccept(user)) {
-            LOG.warn("Acceptance of this terms of service is not required for this user: " + user);
+            LOGGER.warn("Acceptance of this terms of service is not required for this user: " + user);
             return null;
         }
         if (isPost(request)) {
@@ -65,7 +60,7 @@ public class TermsOfServiceController extends BaseController {
         ModelAndView view = new ModelAndView(!myManager.isAccepted(user) ?
                 myResourcesPath + ACCEPT_TERMS_OF_SERVICE_JSP :
                 myResourcesPath + TERMS_OF_SERVICE_JSP);
-        view.addObject("contentFile", myManager.getConfig().getContentFile());
+        view.addObject("agreementText", myManager.getConfig().getAgreementText());
         view.addObject("termsOfServiceName", myManager.getConfig().getFullDisplayName());
         return view;
     }

@@ -42,7 +42,7 @@
     </bean>
 
     <bean id="userServiceTermsController" class="jetbrains.buildServer.termsOfService.TermsOfServiceController">
-        <constructor-arg index="3" ref="userServiceTermsManager"/>
+        <constructor-arg index="2" ref="userServiceTermsManager"/>
     </bean>
 
     <bean id="userServiceTermsManager" class="jetbrains.buildServer.termsOfService.PropertyBasedManager">
@@ -52,7 +52,7 @@
                 <constructor-arg value="Terms of Service"/>
                 <constructor-arg value="Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)"/>
                 <constructor-arg value="/userTerms.html"/>
-                <constructor-arg value="_text.jspf"/>
+                <constructor-arg value="agreement.html"/>
             </bean>
         </constructor-arg>
         <constructor-arg>
