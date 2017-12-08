@@ -56,11 +56,11 @@ public class TermsOfServiceController extends BaseController {
     }
 
 
-    protected ModelAndView doGet(@NotNull UserEx user) {
+    private ModelAndView doGet(@NotNull UserEx user) {
         ModelAndView view = new ModelAndView(!myManager.isAccepted(user) ?
                 myResourcesPath + ACCEPT_TERMS_OF_SERVICE_JSP :
                 myResourcesPath + TERMS_OF_SERVICE_JSP);
-        view.addObject("agreementText", myManager.getConfig().getAgreementText());
+        view.addObject("agreementText", myManager.getConfig().getAgreementText(user));
         view.addObject("termsOfServiceName", myManager.getConfig().getFullDisplayName());
         return view;
     }

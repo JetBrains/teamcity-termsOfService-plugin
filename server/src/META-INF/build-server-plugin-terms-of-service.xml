@@ -45,18 +45,14 @@
         <constructor-arg index="2" ref="userServiceTermsManager"/>
     </bean>
 
-    <bean id="userServiceTermsManager" class="jetbrains.buildServer.termsOfService.PropertyBasedManager">
+    <bean id="userServiceTermsManager" class="jetbrains.buildServer.termsOfService.TermsOfServiceManagerImpl">
         <constructor-arg>
-            <bean class="jetbrains.buildServer.termsOfService.PropertyBasedConfig">
-                <constructor-arg value=".teamcity.userTermsOfServices.accepted"/>
+            <bean class="jetbrains.buildServer.termsOfService.FileBasedConfig">
                 <constructor-arg value="Terms of Service"/>
                 <constructor-arg value="Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)"/>
                 <constructor-arg value="/userTerms.html"/>
                 <constructor-arg value="agreement.html"/>
             </bean>
-        </constructor-arg>
-        <constructor-arg>
-            <util:constant static-field="jetbrains.buildServer.termsOfService.TermsOfServiceUtil.ANY_USER_NO_GUEST"/>
         </constructor-arg>
     </bean>
 

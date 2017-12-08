@@ -40,7 +40,7 @@ public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerIntercep
             return true;
         }
 
-        if (!myManager.isEnabled() || !myManager.shouldAccept(user) || myManager.isAccepted(user)) {
+        if (!myManager.shouldAccept(user) || myManager.isAccepted(user)) {
             return true;
         }
 

@@ -8,12 +8,6 @@ public class TermsOfServiceUtil {
 
     public static UserCondition ANY_USER_NO_GUEST = TermsOfServiceUtil::hasPermissionChangeOwnProfile;
 
-    public static UserCondition PROJECT_MANAGER_NO_GUEST = user -> hasPermissionChangeOwnProfile(user) && hasProjectEditPermission(user);
-
-    public static boolean hasProjectEditPermission(@NotNull  SUser user) {
-        return user.isPermissionGrantedForAnyProject(Permission.EDIT_PROJECT);
-    }
-
     public static boolean hasPermissionChangeOwnProfile(@NotNull  SUser user){
         return user.isPermissionGrantedForAnyProject(Permission.CHANGE_OWN_PROFILE);
     }

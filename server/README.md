@@ -46,7 +46,7 @@ You can use the plugin to show any number of terms of services for any (or both)
 
     <bean id="userServiceTermsManager" class="jetbrains.buildServer.termsOfService.PropertyBasedManager">
         <constructor-arg>
-            <bean class="jetbrains.buildServer.termsOfService.PropertyBasedConfig">
+            <bean class="jetbrains.buildServer.termsOfService.FileBasedConfig">
                 <constructor-arg value=".teamcity.userTermsOfServices.accepted"/>
                 <constructor-arg value="User Terms of Service"/>
                 <constructor-arg value="/userTerms.html"/>
@@ -91,7 +91,7 @@ You can use the plugin to show any number of terms of services for any (or both)
 
     <bean id="userServiceTermsManager" class="jetbrains.buildServer.termsOfService.PropertyBasedManager">
         <constructor-arg>
-            <bean class="jetbrains.buildServer.termsOfService.PropertyBasedConfig">
+            <bean class="jetbrains.buildServer.termsOfService.FileBasedConfig">
                 <constructor-arg value=".teamcity.userTermsOfServices.accepted"/>
                 <constructor-arg value="User Terms of Service"/>
                 <constructor-arg value="/userTerms.html"/>
@@ -106,7 +106,7 @@ You can use the plugin to show any number of terms of services for any (or both)
 
     <bean id="pmServiceTermsManager" class="jetbrains.buildServer.termsOfService.PropertyBasedManager">
         <constructor-arg>
-            <bean class="jetbrains.buildServer.termsOfService.PropertyBasedConfig">
+            <bean class="jetbrains.buildServer.termsOfService.FileBasedConfig">
                 <constructor-arg value=".teamcity.pmTermsOfServices.accepted"/>
                 <constructor-arg value="Project Manager Terms of Service"/>
                 <constructor-arg value="/pmTerms.html"/>

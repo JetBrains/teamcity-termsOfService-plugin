@@ -7,8 +7,6 @@ import org.jetbrains.annotations.NotNull;
 public interface TermsOfServiceManager {
     Logger LOGGER = Logger.getInstance("jetbrains.buildServer.TermsOfService");
 
-    boolean isEnabled();
-
     @NotNull
     TermsOfServiceConfig getConfig();
 
