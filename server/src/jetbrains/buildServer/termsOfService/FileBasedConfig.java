@@ -3,6 +3,7 @@ package jetbrains.buildServer.termsOfService;
 import jetbrains.buildServer.serverSide.BuildServerAdapter;
 import jetbrains.buildServer.serverSide.BuildServerListener;
 import jetbrains.buildServer.serverSide.ServerPaths;
+import jetbrains.buildServer.serverSide.auth.Permission;
 import jetbrains.buildServer.users.PropertyKey;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.users.SimplePropertyKey;
@@ -102,7 +103,7 @@ public class FileBasedConfig implements TermsOfServiceConfig {
                         Element paramsElement = ((Element) child).getChild("parameters");
                         Map<String, String> params = paramsElement == null ? emptyMap() : XmlUtil.readParameters(paramsElement);
                         if (params.get("agreement-file") != null) {
-                            myRules.put(TermsOfServiceUtil.ANY_USER_NO_GUEST,  new Rule() {
+                            myRules.put(user -> user.isPermissionGrantedForAnyProject(Permission.CHANGE_OWN_PROFILE),  new Rule() {
 
                                 @NotNull
                                 @Override
