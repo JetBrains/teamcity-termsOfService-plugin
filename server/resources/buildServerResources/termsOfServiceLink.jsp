@@ -6,7 +6,7 @@
     <div id="tsLinks" style="display: none;">
             <br/>
             <c:url var="url" value="${entryPointPrefix}"/>
-            <a href="${url}" onclick="BS.Util.popupWindow('${url}', 'agreement0'); return false" class="licenseAgreementLink" type="">${agreement.agreementShortName}</a>
+            <a href="${url}" onclick="BS.Util.popupWindow('${url}', 'agreement0'); return false" class="licenseAgreementLink" type="">${agreement.shortName}</a>
     </div>
 </c:if>
 
