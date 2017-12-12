@@ -1,5 +1,5 @@
 <%@include file="/include-internal.jsp" %>
-<%--@elvariable id="agreement" type="jetbrains.buildServer.termsOfService.TermsOfServiceConfig.Rule"--%>
+<%--@elvariable id="agreement" type="jetbrains.buildServer.termsOfService.TermsOfServiceManager.Agreement"--%>
 <%--@elvariable id="teamcityPluginResourcesPath" type="java.lang.String"--%>
 <c:if test="${agreement != null}">
 

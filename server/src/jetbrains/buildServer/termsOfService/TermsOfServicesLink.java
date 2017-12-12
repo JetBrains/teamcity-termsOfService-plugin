@@ -29,7 +29,7 @@ public class TermsOfServicesLink extends SimplePageExtension {
 
         SUser user = SessionUser.getUser(request);
         if (user != null) {
-            Optional<TermsOfServiceConfig.Rule> rule = termsOfServiceManager.getConfig().getRule(user);
+            Optional<TermsOfServiceManager.Agreement> rule = termsOfServiceManager.getAgreementFor(user);
             if (rule.isPresent()) {
                 model.put("agreement", rule.get());
                 model.put("entryPointPrefix", TermsOfServiceHandlerInterceptor.ENTRY_POINT_PREFIX);

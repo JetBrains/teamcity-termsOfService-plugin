@@ -5,55 +5,11 @@
                http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
        default-autowire="constructor">
 
-    <bean class="jetbrains.buildServer.termsOfService.TermsOfServiceHandlerInterceptor" lazy-init="false">
-        <constructor-arg ref="userServiceTermsManager"/>
-        <property name="nonMemorizablePaths">
-            <list>
-                <value>/ajax.html</value>
-                <value>/app/subscriptions/**</value>
-                <value>/app/rest/**</value>
-                <value>/action.html</value>
-                <value>/subscriptions.html</value>
-                <value>/changesPopup.html</value>
-                <value>/changesPopupTab.html</value>
-                <value>/filesPopup.html</value>
-                <value>/allProjects.html</value>
-                <value>/externalStatus.html</value>
-                <value>/visibleProjects.html</value>
-                <value>/visibleBuildTypes.html</value>
-                <value>/showCompatibleAgents.html</value>
-                <value>/admin/action.html</value>
-                <value>/buildGraph.html</value>
-                <value>/showAgreement.html</value>
-                <value>/queuedBuilds.html</value>
-                <value>/viewDependentArtifactsPopup.html</value>
-                <value>/runBuild.html</value>
-                <value>/promotionGraph.html</value>
-                <value>/promoDetailsPopup.html</value>
-                <value>/tz.html</value>
-                <value>/authenticationTest.html</value>
-
-                <!--The next path are here only for backwars compatibility.
-                See jetbrains.buildServer.controllers.obsolete.EventTrackerController-->
-                <value>/eventTracker.html</value>
-                <value>/serverStatistics.html</value>
-            </list>
-        </property>
-    </bean>
-
-    <bean id="userServiceTermsController" class="jetbrains.buildServer.termsOfService.TermsOfServiceController">
-        <constructor-arg index="2" ref="userServiceTermsManager"/>
-    </bean>
-
-    <bean id="userServiceTermsManager" class="jetbrains.buildServer.termsOfService.TermsOfServiceManagerImpl">
-        <constructor-arg>
-            <bean class="jetbrains.buildServer.termsOfService.FileBasedConfig"/>
-        </constructor-arg>
-    </bean>
-
-
-    <bean class="jetbrains.buildServer.termsOfService.TermsOfServicesLink">
-    </bean>
+    <bean class="jetbrains.buildServer.termsOfService.TermsOfServiceHandlerInterceptor" lazy-init="false"/>
+    <bean class="jetbrains.buildServer.termsOfService.TermsOfServiceController"/>
+    <bean class="jetbrains.buildServer.termsOfService.TermsOfServiceManagerImpl"/>
+    <bean class="jetbrains.buildServer.termsOfService.TermsOfServiceConfig"/>
+    <bean class="jetbrains.buildServer.termsOfService.TermsOfServicesLink"/>
 
 
 </beans>
