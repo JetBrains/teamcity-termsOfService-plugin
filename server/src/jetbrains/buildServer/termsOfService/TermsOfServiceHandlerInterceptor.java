@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerInterceptor {
 
-    protected static final String ENTRY_POINT_PREFIX = "/termsOfServices";
+    protected static final String ENTRY_POINT_PREFIX = "/termsOfServices.html";
 
     @NotNull
     private final TermsOfServiceManager myManager;
@@ -46,7 +46,7 @@ public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerIntercep
 
         if (!path.startsWith(ENTRY_POINT_PREFIX)) {
             String requestUrl = WebUtil.getOriginalPathWithoutContext(request);
-            String entryPoint = getEntryPoint(myManager.getConfig().getPath());
+            String entryPoint = ENTRY_POINT_PREFIX;
             TermsOfServiceManager.LOGGER.debug(String.format("Will redirect to %s. Remembered original request url %s", entryPoint, requestUrl));
             RememberUrl.remember(request, requestUrl);
             response.sendRedirect(request.getContextPath() + entryPoint);
@@ -55,7 +55,4 @@ public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerIntercep
         return true;
     }
 
-    public static String getEntryPoint(@NotNull String path){
-        return ENTRY_POINT_PREFIX + path;
-    }
 }

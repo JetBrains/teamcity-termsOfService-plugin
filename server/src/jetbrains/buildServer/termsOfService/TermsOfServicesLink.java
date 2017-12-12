@@ -13,13 +13,13 @@ import java.util.*;
 
 public class TermsOfServicesLink extends SimplePageExtension {
 
-    private final Collection<TermsOfServiceManager> myManagers;
+    private final TermsOfServiceManager termsOfServiceManager;
 
-    public TermsOfServicesLink(@NotNull Collection<TermsOfServiceManager> managers,
+    public TermsOfServicesLink(@NotNull TermsOfServiceManager manager,
                                @NotNull PagePlaces pagePlaces,
                                @NotNull PluginDescriptor descriptor) {
         super(pagePlaces, PlaceId.ALL_PAGES_FOOTER, "TermsOfServicesLink", descriptor.getPluginResourcesPath() + "/termsOfServiceLink.jsp");
-        myManagers = managers;
+        termsOfServiceManager = manager;
         register();
     }
 
@@ -27,25 +27,13 @@ public class TermsOfServicesLink extends SimplePageExtension {
     public void fillModel(@NotNull Map<String, Object> model, @NotNull HttpServletRequest request) {
         super.fillModel(model, request);
 
-        model.put("termsOfServices", filter(myManagers, request));
-
-        model.put("entryPointPrefix", TermsOfServiceHandlerInterceptor.ENTRY_POINT_PREFIX);
-    }
-
-    @NotNull
-    private List<TermsOfServiceManager> filter(@NotNull Collection<TermsOfServiceManager> managers,
-                                               @NotNull HttpServletRequest request) {
-        List<TermsOfServiceManager> result = new ArrayList<TermsOfServiceManager>();
         SUser user = SessionUser.getUser(request);
-        if (user == null) {
-            return Collections.emptyList();
-        }
-        for (TermsOfServiceManager manager : managers) {
-            if (!manager.shouldAccept(user)) {
-                continue;
+        if (user != null) {
+            Optional<TermsOfServiceConfig.Rule> rule = termsOfServiceManager.getConfig().getRule(user);
+            if (rule.isPresent()) {
+                model.put("agreement", rule.get());
+                model.put("entryPointPrefix", TermsOfServiceHandlerInterceptor.ENTRY_POINT_PREFIX);
             }
-            result.add(manager);
         }
-        return result;
     }
 }

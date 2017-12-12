@@ -38,9 +38,7 @@ public class TermsOfServiceControllerTest extends BaseControllerTestCase {
         FileUtil.createIfDoesntExist(myAgreementFile);
         FileUtil.writeFile(myAgreementFile, "Agreement");
 
-        termsOfServiceManager = new TermsOfServiceManagerImpl(new FileBasedConfig("Terms of Service", "Terms of Service",
-                "_for_users.html", myFixture.getEventDispatcher(),
-                myFixture.getServerPaths()));
+        termsOfServiceManager = new TermsOfServiceManagerImpl(new FileBasedConfig(myFixture.getEventDispatcher(), myFixture.getServerPaths()));
     }
 
     @Override

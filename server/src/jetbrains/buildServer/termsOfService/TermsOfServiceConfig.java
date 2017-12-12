@@ -9,9 +9,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 public interface TermsOfServiceConfig {
-    String getShortDisplayName();
-
-    String getFullDisplayName();
 
     /**
      * @return agreement text or null when text is not defined.
@@ -19,12 +16,16 @@ public interface TermsOfServiceConfig {
     @Nullable
     String getAgreementText(@NotNull SUser user);
 
-    String getPath();
-
     @NotNull
     Optional<Rule> getRule(@NotNull SUser user);
 
     interface Rule {
+
+        @NotNull
+        String getAgreementShortName();
+
+        @NotNull
+        String getAgreementFullName();
 
         @NotNull
         String getAgreementFileName();

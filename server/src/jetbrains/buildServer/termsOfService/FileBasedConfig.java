@@ -9,6 +9,7 @@ import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.users.SimplePropertyKey;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.FileUtil;
+import jetbrains.buildServer.util.StringUtil;
 import jetbrains.buildServer.util.XmlUtil;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -24,27 +25,14 @@ import java.util.Optional;
 import static java.util.Collections.emptyMap;
 
 public class FileBasedConfig implements TermsOfServiceConfig {
-    @NotNull
-    private final String myShortName;
-    @NotNull
-    private final String myFullName;
-    @NotNull
-    private final String myPath;
-
     private final Map<UserCondition, Rule> myRules = new LinkedHashMap<>();
 
     private final File myConfigDir;
 
-    public FileBasedConfig(final @NotNull String shortName,
-                           final @NotNull String fullName,
-                           final @NotNull String entryPoint,
+    public FileBasedConfig(
                            final @NotNull EventDispatcher<BuildServerListener> myEvents,
                            final @NotNull ServerPaths serverPaths) {
         myConfigDir = new File(serverPaths.getConfigDir(), "termsOfService");
-
-        myShortName = shortName;
-        myFullName = fullName;
-        myPath = entryPoint;
 
         myEvents.addListener(new BuildServerAdapter() {
             @Override
@@ -52,16 +40,6 @@ public class FileBasedConfig implements TermsOfServiceConfig {
                 loadSettings();
             }
         });
-    }
-
-    @Override
-    public synchronized String getShortDisplayName() {
-        return myShortName;
-    }
-
-    @Override
-    public String getFullDisplayName() {
-        return myFullName;
     }
 
     @Nullable
@@ -82,11 +60,6 @@ public class FileBasedConfig implements TermsOfServiceConfig {
     }
 
     @NotNull
-    public String getPath() {
-        return myPath;
-    }
-
-    @NotNull
     @Override
     public Optional<Rule> getRule(@NotNull SUser user) {
         return myRules.entrySet().stream().filter(e -> e.getKey().shouldAccept(user)).findFirst().map(Map.Entry::getValue);
@@ -104,6 +77,18 @@ public class FileBasedConfig implements TermsOfServiceConfig {
                         Map<String, String> params = paramsElement == null ? emptyMap() : XmlUtil.readParameters(paramsElement);
                         if (params.get("agreement-file") != null) {
                             myRules.put(user -> user.isPermissionGrantedForAnyProject(Permission.CHANGE_OWN_PROFILE),  new Rule() {
+
+                                @NotNull
+                                @Override
+                                public String getAgreementShortName() {
+                                    return StringUtil.notNullize(params.get("short-name"), "Terms of Service");
+                                }
+
+                                @NotNull
+                                @Override
+                                public String getAgreementFullName() {
+                                    return StringUtil.notNullize(params.get("full-name"), "Terms of Service");
+                                }
 
                                 @NotNull
                                 @Override

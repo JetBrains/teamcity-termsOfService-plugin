@@ -1,13 +1,15 @@
 <%@include file="/include-internal.jsp" %>
-<%--@elvariable id="termsOfServices" type="java.util.List<jetbrains.buildServer.termsOfService.TermsOfServiceManager>"--%>
+<%--@elvariable id="agreement" type="jetbrains.buildServer.termsOfService.TermsOfServiceConfig.Rule"--%>
 <%--@elvariable id="teamcityPluginResourcesPath" type="java.lang.String"--%>
-<div id="tsLinks" style="display: none;">
-    <c:forEach items="${termsOfServices}" var="ts" varStatus="tsStatus">
-        <br/>
-        <c:url var="url" value="${entryPointPrefix}${ts.config.path}"/>
-        <a href="${url}" onclick="BS.Util.popupWindow('${url}', 'agreement${tsStatus.index}'); return false" class="licenseAgreementLink" type="">${ts.config.shortDisplayName}</a>
-    </c:forEach>
-</div>
+<c:if test="${agreement != null}">
+
+    <div id="tsLinks" style="display: none;">
+            <br/>
+            <c:url var="url" value="${entryPointPrefix}"/>
+            <a href="${url}" onclick="BS.Util.popupWindow('${url}', 'agreement0'); return false" class="licenseAgreementLink" type="">${agreement.agreementShortName}</a>
+    </div>
+</c:if>
+
 <script type="text/javascript">
     BS.TermsOfServices = {
       updateFooter: function(){

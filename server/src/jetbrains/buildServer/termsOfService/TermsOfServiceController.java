@@ -15,6 +15,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 
 import static jetbrains.buildServer.termsOfService.TermsOfServiceManager.LOGGER;
 
@@ -32,7 +33,7 @@ public class TermsOfServiceController extends BaseController {
                                     @NotNull PluginDescriptor descriptor,
                                     @NotNull TermsOfServiceManager manager) {
         myManager = manager;
-        webControllerManager.registerController(TermsOfServiceHandlerInterceptor.getEntryPoint(myManager.getConfig().getPath()), this);
+        webControllerManager.registerController(TermsOfServiceHandlerInterceptor.ENTRY_POINT_PREFIX, this);
         myResourcesPath = descriptor.getPluginResourcesPath();
     }
 
@@ -60,8 +61,12 @@ public class TermsOfServiceController extends BaseController {
         ModelAndView view = new ModelAndView(!myManager.isAccepted(user) ?
                 myResourcesPath + ACCEPT_TERMS_OF_SERVICE_JSP :
                 myResourcesPath + TERMS_OF_SERVICE_JSP);
+        Optional<TermsOfServiceConfig.Rule> rule = myManager.getConfig().getRule(user);
+        if (!rule.isPresent()) {
+            return null;
+        }
         view.addObject("agreementText", myManager.getConfig().getAgreementText(user));
-        view.addObject("termsOfServiceName", myManager.getConfig().getFullDisplayName());
+        view.addObject("termsOfServiceName", rule.get().getAgreementFullName());
         return view;
     }
 

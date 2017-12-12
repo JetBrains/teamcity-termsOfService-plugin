@@ -47,22 +47,12 @@
 
     <bean id="userServiceTermsManager" class="jetbrains.buildServer.termsOfService.TermsOfServiceManagerImpl">
         <constructor-arg>
-            <bean class="jetbrains.buildServer.termsOfService.FileBasedConfig">
-                <constructor-arg value="Terms of Service"/>
-                <constructor-arg value="Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)"/>
-                <constructor-arg value="/userTerms.html"/>
-                <constructor-arg value="agreement.html"/>
-            </bean>
+            <bean class="jetbrains.buildServer.termsOfService.FileBasedConfig"/>
         </constructor-arg>
     </bean>
 
 
     <bean class="jetbrains.buildServer.termsOfService.TermsOfServicesLink">
-        <constructor-arg index="0">
-            <util:list>
-                <ref bean="userServiceTermsManager"/>
-            </util:list>
-        </constructor-arg>
     </bean>
 
 

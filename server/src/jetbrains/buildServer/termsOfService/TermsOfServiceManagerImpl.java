@@ -27,7 +27,8 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
 
     @Override
     public boolean shouldAccept(@NotNull SUser user) {
-        return TeamCityProperties.getBoolean(TEAMCITY_TERMS_OF_SERVICE_ENABLED_PROPERTY) && myConfig.getAgreementText(user) != null;
+        return TeamCityProperties.getBoolean(TEAMCITY_TERMS_OF_SERVICE_ENABLED_PROPERTY)
+                && myConfig.getAgreementText(user) != null;
     }
 
     public void accept(@NotNull final SUser user) {
