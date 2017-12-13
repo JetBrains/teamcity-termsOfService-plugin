@@ -31,8 +31,8 @@ public class TermsOfServicesLink extends SimplePageExtension {
         if (user != null) {
             Optional<TermsOfServiceManager.Agreement> rule = termsOfServiceManager.getAgreementFor(user);
             if (rule.isPresent()) {
-                model.put("agreement", rule.get());
-                model.put("entryPointPrefix", TermsOfServiceHandlerInterceptor.ENTRY_POINT_PREFIX);
+                model.put("agreementName", rule.get().getShortName());
+                model.put("agreementLink", rule.get().getText() != null ? TermsOfServiceHandlerInterceptor.ENTRY_POINT_PREFIX : rule.get().getLink());
             }
         }
     }

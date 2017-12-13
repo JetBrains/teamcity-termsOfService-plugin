@@ -11,6 +11,7 @@ import jetbrains.buildServer.web.util.WebUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -64,6 +65,10 @@ public class TermsOfServiceController extends BaseController {
         Optional<TermsOfServiceManager.Agreement> rule = myManager.getAgreementFor(user);
         if (!rule.isPresent()) {
             return null;
+        }
+        String agreementText = rule.get().getText();
+        if (agreementText == null) {
+            return new ModelAndView(new RedirectView(rule.get().getLink()));
         }
         view.addObject("agreementText", rule.get().getText());
         view.addObject("termsOfServiceName", rule.get().getFullName());

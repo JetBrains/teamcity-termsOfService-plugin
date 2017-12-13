@@ -17,5 +17,6 @@
     <orderEntry type="library" name="log4j" level="project" />
     <orderEntry type="library" name="TeamCity server runtime" level="project" />
     <orderEntry type="library" name="tests" level="project" />
+    <orderEntry type="library" name="Servlet Api" level="project" />
   </component>
 </module>

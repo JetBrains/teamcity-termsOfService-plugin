@@ -18,6 +18,7 @@ import jetbrains.buildServer.util.XmlUtil;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.io.File;
@@ -65,7 +66,7 @@ public class TermsOfServiceConfig {
         return myRules.entrySet().stream().filter(e -> e.getKey().shouldAccept(user)).findFirst().map(Map.Entry::getValue);
     }
 
-    private synchronized void loadSettings() {
+    synchronized void loadSettings() {
         try {
             if (mySettingsFile.exists()) {
                 myRules.clear();
@@ -74,7 +75,7 @@ public class TermsOfServiceConfig {
                     if ("ALL_USERS".equals(((Element) child).getAttributeValue("type"))) {
                         Element paramsElement = ((Element) child).getChild("parameters");
                         Map<String, String> params = paramsElement == null ? emptyMap() : XmlUtil.readParameters(paramsElement);
-                        if (params.get("agreement-file") != null) {
+                        if (params.get("agreement-file") != null || params.get("agreement-link") != null) {
                             myRules.put(user -> user.isPermissionGrantedForAnyProject(Permission.CHANGE_OWN_PROFILE), new TermsOfServiceManager.Agreement() {
 
                                 @NotNull
@@ -89,16 +90,27 @@ public class TermsOfServiceConfig {
                                     return StringUtil.notNullize(params.get("full-name"), "Terms of Service");
                                 }
 
-                                @NotNull
+                                @Nullable
                                 @Override
                                 public String getText() {
-                                    File agreementFile = new File(myConfigDir, params.get("agreement-file"));
+                                    String agreementFileParam = params.get("agreement-file");
+                                    if (agreementFileParam == null) {
+                                        return null;
+                                    }
+                                    File agreementFile = new File(myConfigDir, agreementFileParam);
                                     try {
                                         return FileUtil.readText(agreementFile, "UTF-8");
                                     } catch (IOException e) {
                                         TermsOfServiceManager.LOGGER.warnAndDebugDetails("Error while reading Terms Of Service agreement file from " + agreementFile, e);
                                         throw new IllegalStateException("Error while reading Terms Of Service agreement file from " + agreementFile, e);
                                     }
+                                }
+
+                                @Nullable
+                                @Override
+                                public String getLink() {
+                                    if (getText() != null) return null;
+                                    return params.get("agreement-link");
                                 }
 
                                 @NotNull
