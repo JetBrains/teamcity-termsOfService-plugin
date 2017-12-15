@@ -1,7 +1,6 @@
 package jetbrains.buildServer.termsOfService;
 
 import jetbrains.buildServer.configuration.FileWatcher;
-import jetbrains.buildServer.log.LogInitializer;
 import jetbrains.buildServer.serverSide.BuildServerAdapter;
 import jetbrains.buildServer.serverSide.BuildServerListener;
 import jetbrains.buildServer.serverSide.ServerPaths;
@@ -23,16 +22,18 @@ import org.jetbrains.annotations.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static java.util.Collections.emptyMap;
+import static java.util.stream.Collectors.toList;
 
 @ThreadSafe
 public class TermsOfServiceConfig {
     private static final String CONFIG_FILE = "terms-of-service-config.xml";
-    private final Map<UserCondition, TermsOfServiceManager.Agreement> myRules = new LinkedHashMap<>();
+
+    private final List<AgreementSettings> myAgreements = new ArrayList<>();
 
     private final File myConfigDir;
     private final File mySettingsFile;
@@ -62,70 +63,29 @@ public class TermsOfServiceConfig {
     }
 
     @NotNull
-    public synchronized Optional<TermsOfServiceManager.Agreement> getRule(@NotNull SUser user) {
-        return myRules.entrySet().stream().filter(e -> e.getKey().shouldAccept(user)).findFirst().map(Map.Entry::getValue);
+    public synchronized List<AgreementSettings> getAgreements(@NotNull SUser user) {
+        return myAgreements.stream().filter(e -> e.userCondition.shouldAccept(user)).collect(toList());
     }
 
     synchronized void loadSettings() {
         try {
             if (mySettingsFile.exists()) {
-                myRules.clear();
+                myAgreements.clear();
                 Element parsed = FileUtil.parseDocument(mySettingsFile, false);
-                for (final Object child : parsed.getChildren("rule")) {
-                    if ("ALL_USERS".equals(((Element) child).getAttributeValue("type"))) {
-                        Element paramsElement = ((Element) child).getChild("parameters");
-                        Map<String, String> params = paramsElement == null ? emptyMap() : XmlUtil.readParameters(paramsElement);
-                        if (params.get("agreement-file") != null || params.get("agreement-link") != null) {
-                            myRules.put(user -> user.isPermissionGrantedForAnyProject(Permission.CHANGE_OWN_PROFILE), new TermsOfServiceManager.Agreement() {
-
-                                @NotNull
-                                @Override
-                                public String getShortName() {
-                                    return StringUtil.notNullize(params.get("short-name"), "Terms of Service");
-                                }
-
-                                @NotNull
-                                @Override
-                                public String getFullName() {
-                                    return StringUtil.notNullize(params.get("full-name"), "Terms of Service");
-                                }
-
-                                @Nullable
-                                @Override
-                                public String getText() {
-                                    String agreementFileParam = params.get("agreement-file");
-                                    if (agreementFileParam == null) {
-                                        return null;
-                                    }
-                                    File agreementFile = new File(myConfigDir, agreementFileParam);
-                                    try {
-                                        return FileUtil.readText(agreementFile, "UTF-8");
-                                    } catch (IOException e) {
-                                        TermsOfServiceManager.LOGGER.warnAndDebugDetails("Error while reading Terms Of Service agreement file from " + agreementFile, e);
-                                        throw new IllegalStateException("Error while reading Terms Of Service agreement file from " + agreementFile, e);
-                                    }
-                                }
-
-                                @Nullable
-                                @Override
-                                public String getLink() {
-                                    if (getText() != null) return null;
-                                    return params.get("agreement-link");
-                                }
-
-                                @NotNull
-                                @Override
-                                public PropertyKey getUserPropertyKey() {
-                                    return new SimplePropertyKey(".teamcity.userTermsOfServices.accepted");
-                                }
-                            });
-                            break;
+                for (Object child : parsed.getChildren("agreement")) {
+                    for (Object rule : ((Element) child).getChildren("rule")) {
+                        if ("ALL_USERS".equals(((Element) rule).getAttributeValue("type"))) {
+                            Element paramsElement = ((Element) rule).getChild("parameters");
+                            Map<String, String> params = paramsElement == null ? emptyMap() : XmlUtil.readParameters(paramsElement);
+                            if (params.get("agreement-file") != null || params.get("agreement-link") != null) {
+                                myAgreements.add(new AgreementSettings(((Element) child).getAttributeValue("id"), user -> user.isPermissionGrantedForAnyProject(Permission.CHANGE_OWN_PROFILE), params));
+                            }
                         }
                     }
                 }
             }
 
-            if (myRules.isEmpty()) {
+            if (myAgreements.isEmpty()) {
                 TermsOfServiceManager.LOGGER.warn("No Terms of Service rules were found in " + FileUtil.getCanonicalFile(mySettingsFile).getPath());
             }
         } catch (IOException | JDOMException e) {
@@ -133,5 +93,58 @@ public class TermsOfServiceConfig {
         }
     }
 
+    class AgreementSettings {
+
+        private final String id;
+        private final UserCondition userCondition;
+        private final Map<String, String> params;
+
+        AgreementSettings(@NotNull String id, @NotNull UserCondition userCondition, @NotNull Map<String, String> params) {
+            this.id = id;
+            this.userCondition = userCondition;
+            this.params = params;
+        }
+
+        @NotNull
+        public String getId() {
+            return id;
+        }
+
+        @NotNull
+        public String getShortName() {
+            return StringUtil.notNullize(params.get("short-name"), "Terms of Service");
+        }
+
+        @NotNull
+        public String getFullName() {
+            return StringUtil.notNullize(params.get("full-name"), "Terms of Service");
+        }
+
+        @Nullable
+        public String getText() {
+            String agreementFileParam = params.get("agreement-file");
+            if (agreementFileParam == null) {
+                return null;
+            }
+            File agreementFile = new File(myConfigDir, agreementFileParam);
+            try {
+                return FileUtil.readText(agreementFile, "UTF-8");
+            } catch (IOException e) {
+                TermsOfServiceManager.LOGGER.warnAndDebugDetails("Error while reading Terms Of Service agreement file from " + agreementFile, e);
+                throw new IllegalStateException("Error while reading Terms Of Service agreement file from " + agreementFile, e);
+            }
+        }
+
+        @Nullable
+        public String getLink() {
+            if (getText() != null) return null;
+            return params.get("agreement-link");
+        }
+
+        @NotNull
+        public PropertyKey getUserPropertyKey() {
+            return new SimplePropertyKey(".teamcity.userTermsOfServices.accepted");
+        }
+    }
 }
 

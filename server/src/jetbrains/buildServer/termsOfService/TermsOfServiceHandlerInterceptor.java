@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerInterceptor {
 
-    protected static final String ENTRY_POINT_PREFIX = "/termsOfServices.html";
+    public static final String ENTRY_POINT_PREFIX = "/termsOfServices.html";
 
     @NotNull
     private final TermsOfServiceManager myManager;
@@ -40,7 +40,7 @@ public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerIntercep
             return true;
         }
 
-        if (!myManager.shouldAccept(user) || myManager.isAccepted(user)) {
+        if (!myManager.mustAccept(user)) {
             return true;
         }
 

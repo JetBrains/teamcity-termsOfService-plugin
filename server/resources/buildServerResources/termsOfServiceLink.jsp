@@ -1,13 +1,15 @@
 <%@include file="/include-internal.jsp" %>
-<%--@elvariable id="agreementName" type="java.lang.String"--%>
-<%--@elvariable id="agreementLink" type="java.lang.String"--%>
+<%--@elvariable id="agreements" type="java.util.List"--%>
 <%--@elvariable id="teamcityPluginResourcesPath" type="java.lang.String"--%>
-<c:if test="${agreementName != null}">
+<c:if test="${fn:length(agreements) > 0}">
 
     <div id="tsLinks" style="display: none;">
+        <c:forEach items="${agreements}" var="agreement">
+            <%--@elvariable id="agreement" type="jetbrains.buildServer.termsOfService.TermsOfServiceManager.Agreement"--%>
             <br/>
-            <c:url var="url" value="${agreementLink}"/>
-            <a href="${url}" onclick="BS.Util.popupWindow('${url}', 'agreement0'); return false" class="licenseAgreementLink" type="">${agreementName}</a>
+            <c:url var="url" value="${agreement.link}"/>
+            <a href="${url}" onclick="BS.Util.popupWindow('${url}', 'agreement0'); return false" class="licenseAgreementLink" type="">${agreement.shortName}</a>
+        </c:forEach>
     </div>
 </c:if>
 

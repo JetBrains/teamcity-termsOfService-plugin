@@ -18,5 +18,6 @@
     <orderEntry type="library" name="TeamCity server runtime" level="project" />
     <orderEntry type="library" name="tests" level="project" />
     <orderEntry type="library" name="Servlet Api" level="project" />
+    <orderEntry type="library" name="assertj-core-3.8.0" level="project" />
   </component>
 </module>

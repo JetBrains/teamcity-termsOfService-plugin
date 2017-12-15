@@ -14,8 +14,10 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import static jetbrains.buildServer.asserts.WebAsserts.then;
 import static jetbrains.buildServer.termsOfService.TermsOfServiceManagerImpl.TEAMCITY_TERMS_OF_SERVICE_ENABLED_PROPERTY;
 
 public class TermsOfServiceControllerTest extends BaseControllerTestCase {
@@ -32,13 +34,19 @@ public class TermsOfServiceControllerTest extends BaseControllerTestCase {
         File termsOfServiceDir = new File(myFixture.getServerPaths().getConfigDir(), "termsOfService");
         configFile = new File(termsOfServiceDir, "terms-of-service-config.xml");
         FileUtil.createIfDoesntExist(configFile);
-        FileUtil.writeFile(configFile, "<terms-of-service-config>\n" +
-                "<rule type=\"ALL_USERS\">\n" +
-                "<parameters>\n" +
-                "<param name=\"agreement-file\" value=\"agreement.html\"/>\n" +
-                "</parameters>\n" +
-                "</rule>\n" +
-                "</terms-of-service-config>");
+        FileUtil.writeFile(configFile,
+                "<terms-of-service-config>\n" +
+                        "    <agreement id=\"hosted_teamcity\">\n" +
+                        "      <rule type=\"ALL_USERS\">\n" +
+                        "        <parameters>\n" +
+                        "          \t<param name=\"agreement-file\" value=\"agreement.html\"/>\n" +
+                        "            <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
+                        "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
+                        "        </parameters>\n" +
+                        "      </rule>\n" +
+                        "    </agreement>\n" +
+                        "</terms-of-service-config>");
+
         myAgreementFile = new File(termsOfServiceDir, "agreement.html");
         FileUtil.createIfDoesntExist(myAgreementFile);
         FileUtil.writeFile(myAgreementFile, "Agreement");
@@ -61,11 +69,14 @@ public class TermsOfServiceControllerTest extends BaseControllerTestCase {
     @Test
     public void test_terms_of_service_not_accepted_yet() throws Exception {
         makeLoggedIn(createUser("user1"));
-        ModelAndView modelAndView = doGet();
+
+        ModelAndView modelAndView = doGet("agreement", "hosted_teamcity");
+
         Assert.assertNotNull(modelAndView);
-        Assert.assertEquals(modelAndView.getViewName(), TermsOfServiceController.ACCEPT_TERMS_OF_SERVICE_JSP);
-        Assert.assertEquals(modelAndView.getModel().get("agreementText"), FileUtil.readText(myAgreementFile, "UTF-8"));
-        Assert.assertEquals(modelAndView.getModel().get("termsOfServiceName"), "Terms of Service");
+
+        then(modelAndView).hasViewName(TermsOfServiceController.ACCEPT_TERMS_OF_SERVICE_JSP);
+        then(modelAndView.getModel().get("agreementText")).isEqualTo(FileUtil.readText(myAgreementFile, "UTF-8"));
+        then(modelAndView.getModel().get("termsOfServiceName")).isEqualTo("Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)");
     }
 
     @Test
@@ -74,41 +85,84 @@ public class TermsOfServiceControllerTest extends BaseControllerTestCase {
         SUser user2 = createUser("user2");
 
         makeLoggedIn(user1);
-        ModelAndView modelAndView = doGet();
-        Assert.assertEquals(modelAndView.getViewName(), TermsOfServiceController.ACCEPT_TERMS_OF_SERVICE_JSP);
+        then(termsOfServiceManager.mustAccept(user1)).isTrue();
 
-        modelAndView = doPost();
-        Assert.assertNull(modelAndView);
-        Assert.assertTrue(termsOfServiceManager.isAccepted(user1));
+        ModelAndView modelAndView = doGet("agreement", "hosted_teamcity");
+        then(modelAndView).hasViewName(TermsOfServiceController.ACCEPT_TERMS_OF_SERVICE_JSP);
 
-        modelAndView = doGet();
-        Assert.assertNotNull(modelAndView);
-        Assert.assertEquals(modelAndView.getViewName(), TermsOfServiceController.TERMS_OF_SERVICE_JSP);
+        doPost("agreement", "hosted_teamcity");
+        then(termsOfServiceManager.mustAccept(user1)).isFalse();
+        then(termsOfServiceManager.getAgreementsFor(user1)).allMatch(a -> a.isAccepted(user1));
+
+        modelAndView = doGet("agreement", "hosted_teamcity");
+        then(modelAndView).hasViewName(TermsOfServiceController.TERMS_OF_SERVICE_JSP);
 
         makeLoggedIn(user2);
-        modelAndView = doGet();
-        Assert.assertNotNull(modelAndView);
-        Assert.assertEquals(modelAndView.getViewName(), TermsOfServiceController.ACCEPT_TERMS_OF_SERVICE_JSP);
+        modelAndView = doGet("agreement", "hosted_teamcity");
+        then(modelAndView).hasViewName(TermsOfServiceController.ACCEPT_TERMS_OF_SERVICE_JSP);
     }
 
     @Test
     public void should_support_links_to_external_agreements() throws Exception {
-        FileUtil.writeFile(configFile, "<terms-of-service-config>\n" +
-                "<rule type=\"ALL_USERS\">\n" +
-                "<parameters>\n" +
-                "<param name=\"agreement-link\" value=\"http://jetbrains.com/agreement.html\"/>\n" +
-                "</parameters>\n" +
-                "</rule>\n" +
-                "</terms-of-service-config>");
+        FileUtil.writeFile(configFile,
+                "<terms-of-service-config>\n" +
+                        "    <agreement id=\"hosted_teamcity\">\n" +
+                        "      <rule type=\"ALL_USERS\">\n" +
+                        "        <parameters>\n" +
+                        "          \t<param name=\"agreement-link\" value=\"http://jetbrains.com/agreement.html\"/>\n" +
+                        "            <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
+                        "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
+                        "        </parameters>\n" +
+                        "      </rule>\n" +
+                        "    </agreement>\n" +
+                        "</terms-of-service-config>");
+
         config.loadSettings();
 
         makeLoggedIn(createUser("user"));
 
-        ModelAndView modelAndView = doGet();
+        ModelAndView modelAndView = doGet("agreement", "hosted_teamcity");
         Assert.assertEquals(modelAndView.getView().getClass(), RedirectView.class);
 
         Map<String, Object> model = new HashMap<>();
         link.fillModel(model, myRequest);
-        Assert.assertEquals(model.get("agreementLink"), "http://jetbrains.com/agreement.html");
+        then((List<TermsOfServiceManager.Agreement>) model.get("agreements"))
+                .extracting("link")
+                .containsOnly("http://jetbrains.com/agreement.html");
+    }
+
+    @Test
+    public void should_support_several_agreements() {
+        FileUtil.writeFile(configFile,
+                        "<terms-of-service-config>\n" +
+                        "    <agreement id=\"hosted_teamcity\">\n" +
+                        "      <rule type=\"ALL_USERS\">\n" +
+                        "        <parameters>\n" +
+                        "          \t<param name=\"agreement-file\" value=\"agreement.html\"/>\n" +
+                        "            <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
+                        "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
+                        "        </parameters>\n" +
+                        "      </rule>\n" +
+                        "    </agreement>\n" +
+                        "    <agreement id=\"privacy_policy\">\n" +
+                        "      <rule type=\"ALL_USERS\">\n" +
+                        "        <parameters>\n" +
+                        "           \t<param name=\"agreement-link\" value=\"https://www.jetbrains.com/company/privacy.html\"/>\n" +
+                        "            <param name=\"short-name\" value=\"Privacy Policy\"/>\n" +
+                        "        </parameters>\n" +
+                        "      </rule>\n" +
+                        "    </agreement>\n" +
+                        "</terms-of-service-config>");
+        config.loadSettings();
+
+        makeLoggedIn(createUser("user"));
+
+        Map<String, Object> model = new HashMap<>();
+        link.fillModel(model, myRequest);
+
+        then((List<TermsOfServiceManager.Agreement>) model.get("agreements"))
+                .hasSize(2)
+                .extracting("link")
+                .contains("https://www.jetbrains.com/company/privacy.html", "/termsOfServices.html?agreement=hosted_teamcity");
     }
 }

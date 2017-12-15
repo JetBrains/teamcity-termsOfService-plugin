@@ -3,7 +3,7 @@ package jetbrains.buildServer.termsOfService;
 import jetbrains.buildServer.controllers.BaseController;
 import jetbrains.buildServer.controllers.login.RememberUrl;
 import jetbrains.buildServer.controllers.overview.OverviewController;
-import jetbrains.buildServer.users.impl.UserEx;
+import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import jetbrains.buildServer.web.util.SessionUser;
@@ -40,45 +40,52 @@ public class TermsOfServiceController extends BaseController {
 
     @Nullable
     @Override
-    protected ModelAndView doHandle(@NotNull final HttpServletRequest request, @NotNull final HttpServletResponse response) throws Exception {
-        UserEx user = (UserEx) SessionUser.getUser(request);
-        if (user == null) {
-            LOGGER.warn("User is set to null. TermsOfServiceController should not be executed.");
+    protected ModelAndView doHandle(@NotNull final HttpServletRequest request, @NotNull final HttpServletResponse response) {
+        SUser user = SessionUser.getUser(request);
+        String agreementId = request.getParameter("agreement");
+
+        if (agreementId == null) {
+            LOGGER.warn("Request without agreement id detected " + WebUtil.getRequestDump(request));
+            response.setStatus(404);
             return null;
         }
-        if (!myManager.shouldAccept(user)) {
-            LOGGER.warn("Acceptance of this terms of service is not required for this user: " + user);
+
+        Optional<TermsOfServiceManager.Agreement> agreement = myManager.getAgreement(user, agreementId);
+
+        if (!agreement.isPresent()) {
+            LOGGER.warn("Request for unknown agreement '" + agreementId + "'  detected: " + WebUtil.getRequestDump(request));
+            response.setStatus(404);
+            return redirectTo("/", response);
+        }
+
+        if (!agreement.get().shouldAccept(user)) {
+            LOGGER.warn("Acceptance of this agreement is not required for current user: " + user);
             return null;
         }
+
         if (isPost(request)) {
-            return doPost(user, request, response);
+            return accept(user, agreement.get(), request, response);
         } else {
-            return doGet(user);
+            return show(user, agreement.get());
         }
     }
 
 
-    private ModelAndView doGet(@NotNull UserEx user) {
-        ModelAndView view = new ModelAndView(!myManager.isAccepted(user) ?
-                myResourcesPath + ACCEPT_TERMS_OF_SERVICE_JSP :
-                myResourcesPath + TERMS_OF_SERVICE_JSP);
-        Optional<TermsOfServiceManager.Agreement> rule = myManager.getAgreementFor(user);
-        if (!rule.isPresent()) {
-            return null;
-        }
-        String agreementText = rule.get().getText();
+    private ModelAndView show(@NotNull SUser user, @NotNull TermsOfServiceManager.Agreement agreement) {
+        ModelAndView view = new ModelAndView(agreement.isAccepted(user) ? myResourcesPath + TERMS_OF_SERVICE_JSP : myResourcesPath + ACCEPT_TERMS_OF_SERVICE_JSP);
+        String agreementText = agreement.getText();
         if (agreementText == null) {
-            return new ModelAndView(new RedirectView(rule.get().getLink()));
+            return new ModelAndView(new RedirectView(agreement.getLink()));
         }
-        view.addObject("agreementText", rule.get().getText());
-        view.addObject("termsOfServiceName", rule.get().getFullName());
+        view.addObject("agreementText", agreement.getText());
+        view.addObject("termsOfServiceName", agreement.getFullName());
         return view;
     }
 
 
-    private ModelAndView doPost(@NotNull UserEx user, @NotNull final HttpServletRequest request,
-                                @NotNull final HttpServletResponse response) {
-        myManager.accept(user);
+    private ModelAndView accept(@NotNull SUser user, @NotNull TermsOfServiceManager.Agreement agreement,
+                                @NotNull HttpServletRequest request, @NotNull HttpServletResponse response) {
+        agreement.accept(user);
         String next = RememberUrl.readAndForget(request);
         if (next == null) {
             next = OverviewController.getOverviewPageUrl(request);

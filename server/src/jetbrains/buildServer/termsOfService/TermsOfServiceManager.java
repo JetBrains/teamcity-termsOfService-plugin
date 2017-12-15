@@ -6,21 +6,23 @@ import jetbrains.buildServer.users.SUser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface TermsOfServiceManager {
     Logger LOGGER = Logger.getInstance("jetbrains.buildServer.TermsOfService");
 
-    boolean isAccepted(@NotNull SUser user);
-
-    boolean shouldAccept(@NotNull SUser user);
-
-    void accept(@NotNull SUser user);
+    boolean mustAccept(@NotNull SUser user);
 
     @NotNull
-    Optional<Agreement> getAgreementFor(@NotNull SUser user);
+    List<Agreement> getAgreementsFor(@NotNull SUser user);
+
+    @NotNull
+    Optional<Agreement> getAgreement(@NotNull SUser user, @NotNull String id);
 
     interface Agreement {
+        @NotNull
+        String getId();
 
         @NotNull
         String getShortName();
@@ -36,5 +38,11 @@ public interface TermsOfServiceManager {
 
         @NotNull
         PropertyKey getUserPropertyKey();
+
+        boolean shouldAccept(@NotNull SUser user);
+
+        boolean isAccepted(@NotNull SUser user);
+
+        void accept(@NotNull SUser user);
     }
 }
