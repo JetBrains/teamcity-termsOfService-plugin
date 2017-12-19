@@ -10,16 +10,14 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerInterceptor {
-
-    public static final String ENTRY_POINT_PREFIX = "/termsOfServices.html";
 
     @NotNull
     private final TermsOfServiceManager myManager;
 
     public TermsOfServiceHandlerInterceptor(@NotNull TermsOfServiceManager manager) {
-        TermsOfServiceManager.LOGGER.debug("ServiceTermsExtension initialized. Manager: " + manager);
         myManager = manager;
     }
 
@@ -29,7 +27,6 @@ public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerIntercep
         }
 
         String path = WebUtil.getPathWithoutContext(request);
-        TermsOfServiceManager.LOGGER.debug("path=" + path);
 
         if(WebUtil.isAjaxRequest(request)){
             return true;
@@ -40,18 +37,22 @@ public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerIntercep
             return true;
         }
 
-        if (!myManager.mustAccept(user)) {
+        List<TermsOfServiceManager.Agreement> mustAcceptAgreements = myManager.getMustAcceptAgreements(user);
+        if (mustAcceptAgreements.isEmpty()) {
             return true;
         }
 
-        if (!path.startsWith(ENTRY_POINT_PREFIX)) {
-            String requestUrl = WebUtil.getOriginalPathWithoutContext(request);
-            String entryPoint = ENTRY_POINT_PREFIX;
-            TermsOfServiceManager.LOGGER.debug(String.format("Will redirect to %s. Remembered original request url %s", entryPoint, requestUrl));
+        TermsOfServiceManager.Agreement agreement = mustAcceptAgreements.get(0);
+
+        if (!path.startsWith(AcceptTermsOfServiceController.PATH)) {
+            String requestUrl = WebUtil.getRequestUrl(request);
+            String entryPoint = AcceptTermsOfServiceController.PATH + "?agreement=" + agreement.getId();
+            TermsOfServiceLogger.LOGGER.debug(String.format("Will redirect to %s. Remembered original request url %s", entryPoint, requestUrl));
             RememberUrl.remember(request, requestUrl);
             response.sendRedirect(request.getContextPath() + entryPoint);
             return false;
         }
+
         return true;
     }
 

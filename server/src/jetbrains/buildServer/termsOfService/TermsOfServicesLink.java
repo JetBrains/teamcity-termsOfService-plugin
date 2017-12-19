@@ -29,7 +29,7 @@ public class TermsOfServicesLink extends SimplePageExtension {
 
         SUser user = SessionUser.getUser(request);
         if (user != null) {
-            List<TermsOfServiceManager.Agreement> agreements = termsOfServiceManager.getAgreementsFor(user);
+            List<TermsOfServiceManager.Agreement> agreements = termsOfServiceManager.getAgreements();
             if (!agreements.isEmpty()) {
                 model.put("agreements", agreements);
             }

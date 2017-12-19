@@ -10,17 +10,21 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TermsOfServiceManager {
-    Logger LOGGER = Logger.getInstance("jetbrains.buildServer.TermsOfService");
-
-    boolean mustAccept(@NotNull SUser user);
 
     @NotNull
-    List<Agreement> getAgreementsFor(@NotNull SUser user);
+    List<Agreement> getMustAcceptAgreements(@NotNull SUser user);
 
     @NotNull
-    Optional<Agreement> getAgreement(@NotNull SUser user, @NotNull String id);
+    List<Agreement> getAgreements();
+
+    @NotNull
+    Optional<Agreement> findAgreement(@NotNull String id);
+
+    @NotNull
+    Optional<GuestNotice> getGuestNotice();
 
     interface Agreement {
+
         @NotNull
         String getId();
 
@@ -33,16 +37,19 @@ public interface TermsOfServiceManager {
         @Nullable
         String getText();
 
-        @Nullable
-        String getLink();
-
         @NotNull
-        PropertyKey getUserPropertyKey();
-
-        boolean shouldAccept(@NotNull SUser user);
+        String getLink();
 
         boolean isAccepted(@NotNull SUser user);
 
         void accept(@NotNull SUser user);
+    }
+
+    interface GuestNotice {
+        @NotNull
+        String getText();
+
+        @NotNull
+        String getLink();
     }
 }

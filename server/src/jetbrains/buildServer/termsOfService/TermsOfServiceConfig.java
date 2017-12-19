@@ -5,15 +5,10 @@ import jetbrains.buildServer.serverSide.BuildServerAdapter;
 import jetbrains.buildServer.serverSide.BuildServerListener;
 import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.serverSide.TeamCityProperties;
-import jetbrains.buildServer.serverSide.auth.Permission;
 import jetbrains.buildServer.serverSide.impl.FileWatcherFactory;
 import jetbrains.buildServer.users.PropertyKey;
-import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.users.SimplePropertyKey;
-import jetbrains.buildServer.util.EventDispatcher;
-import jetbrains.buildServer.util.FileUtil;
-import jetbrains.buildServer.util.StringUtil;
-import jetbrains.buildServer.util.XmlUtil;
+import jetbrains.buildServer.util.*;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jetbrains.annotations.NotNull;
@@ -25,15 +20,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Collections.emptyMap;
-import static java.util.stream.Collectors.toList;
 
 @ThreadSafe
 public class TermsOfServiceConfig {
     private static final String CONFIG_FILE = "terms-of-service-config.xml";
 
     private final List<AgreementSettings> myAgreements = new ArrayList<>();
+    private Optional<GuestNoticeSettings> myGuestNotice = Optional.empty();
 
     private final File myConfigDir;
     private final File mySettingsFile;
@@ -63,8 +59,18 @@ public class TermsOfServiceConfig {
     }
 
     @NotNull
-    public synchronized List<AgreementSettings> getAgreements(@NotNull SUser user) {
-        return myAgreements.stream().filter(e -> e.userCondition.shouldAccept(user)).collect(toList());
+    public synchronized List<AgreementSettings> getAgreements() {
+        return new ArrayList<>(myAgreements);
+    }
+
+    @NotNull
+    public synchronized Optional<AgreementSettings> getAgreement(@NotNull String id) {
+        return myAgreements.stream().filter(a -> a.getId().equals(id)).findFirst();
+    }
+
+    @NotNull
+    public synchronized Optional<GuestNoticeSettings> getGuestNotice() {
+        return myGuestNotice;
     }
 
     synchronized void loadSettings() {
@@ -72,36 +78,50 @@ public class TermsOfServiceConfig {
             if (mySettingsFile.exists()) {
                 myAgreements.clear();
                 Element parsed = FileUtil.parseDocument(mySettingsFile, false);
-                for (Object child : parsed.getChildren("agreement")) {
-                    for (Object rule : ((Element) child).getChildren("rule")) {
-                        if ("ALL_USERS".equals(((Element) rule).getAttributeValue("type"))) {
-                            Element paramsElement = ((Element) rule).getChild("parameters");
-                            Map<String, String> params = paramsElement == null ? emptyMap() : XmlUtil.readParameters(paramsElement);
-                            if (params.get("agreement-file") != null || params.get("agreement-link") != null) {
-                                myAgreements.add(new AgreementSettings(((Element) child).getAttributeValue("id"), user -> user.isPermissionGrantedForAnyProject(Permission.CHANGE_OWN_PROFILE), params));
-                            }
-                        }
+                List agreementsEls = parsed.getChildren("agreement");
+
+                if (agreementsEls.isEmpty()) {
+                    TermsOfServiceLogger.LOGGER.debug("No 'agreement' elements are found in " + FileUtil.getCanonicalFile(mySettingsFile).getPath());
+                }
+
+                for (Object agreementEl : agreementsEls) {
+                    Element paramsElement = ((Element) agreementEl).getChild("parameters");
+                    Map<String, String> params = paramsElement == null ? emptyMap() : XmlUtil.readParameters(paramsElement);
+                    if (params.get("agreement-file") != null || params.get("agreement-link") != null) {
+                        AgreementSettings agreementSettings = new AgreementSettings(((Element) agreementEl).getAttributeValue("id"), params);
+                        myAgreements.add(agreementSettings);
                     }
                 }
+
+
+                GuestNoticeSettings guestNoticeSettings = null;
+                Element guestNoticeEl = parsed.getChild("guest-notice");
+                if (guestNoticeEl != null) {
+                    Element paramsElement = guestNoticeEl.getChild("parameters");
+                    Map<String, String> params = paramsElement == null ? emptyMap() : XmlUtil.readParameters(paramsElement);
+                    if (params.get("agreement") != null && params.get("text") != null) {
+                        guestNoticeSettings = new GuestNoticeSettings(params.get("text"), params.get("agreement"));
+                    }
+                }
+                myGuestNotice = Optional.ofNullable(guestNoticeSettings);
+
             }
 
             if (myAgreements.isEmpty()) {
-                TermsOfServiceManager.LOGGER.warn("No Terms of Service rules were found in " + FileUtil.getCanonicalFile(mySettingsFile).getPath());
+                TermsOfServiceLogger.LOGGER.warn("No Terms of Service rules were found in " + FileUtil.getCanonicalFile(mySettingsFile).getPath());
             }
         } catch (IOException | JDOMException e) {
-            TermsOfServiceManager.LOGGER.warnAndDebugDetails("Error while loading Terms Of Service settings from " + FileUtil.getCanonicalFile(mySettingsFile).getPath(), e);
+            TermsOfServiceLogger.LOGGER.warnAndDebugDetails("Error while loading Terms Of Service settings from " + FileUtil.getCanonicalFile(mySettingsFile).getPath(), e);
         }
     }
 
     class AgreementSettings {
 
         private final String id;
-        private final UserCondition userCondition;
         private final Map<String, String> params;
 
-        AgreementSettings(@NotNull String id, @NotNull UserCondition userCondition, @NotNull Map<String, String> params) {
+        AgreementSettings(@NotNull String id, @NotNull Map<String, String> params) {
             this.id = id;
-            this.userCondition = userCondition;
             this.params = params;
         }
 
@@ -130,7 +150,7 @@ public class TermsOfServiceConfig {
             try {
                 return FileUtil.readText(agreementFile, "UTF-8");
             } catch (IOException e) {
-                TermsOfServiceManager.LOGGER.warnAndDebugDetails("Error while reading Terms Of Service agreement file from " + agreementFile, e);
+                TermsOfServiceLogger.LOGGER.warnAndDebugDetails("Error while reading Terms Of Service agreement file from " + agreementFile, e);
                 throw new IllegalStateException("Error while reading Terms Of Service agreement file from " + agreementFile, e);
             }
         }
@@ -144,6 +164,24 @@ public class TermsOfServiceConfig {
         @NotNull
         public PropertyKey getUserPropertyKey() {
             return new SimplePropertyKey(".teamcity.userTermsOfServices.accepted");
+        }
+    }
+
+    class GuestNoticeSettings {
+        private final String text;
+        private final String agreementId;
+
+        GuestNoticeSettings(String text, String agreementId) {
+            this.text = text;
+            this.agreementId = agreementId;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public String getAgreementId() {
+            return agreementId;
         }
     }
 }

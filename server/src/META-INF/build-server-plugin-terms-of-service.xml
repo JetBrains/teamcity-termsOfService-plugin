@@ -6,10 +6,12 @@
        default-autowire="constructor">
 
     <bean class="jetbrains.buildServer.termsOfService.TermsOfServiceHandlerInterceptor" lazy-init="false"/>
-    <bean class="jetbrains.buildServer.termsOfService.TermsOfServiceController"/>
+    <bean class="jetbrains.buildServer.termsOfService.ViewTermsOfServiceController"/>
+    <bean class="jetbrains.buildServer.termsOfService.AcceptTermsOfServiceController"/>
     <bean class="jetbrains.buildServer.termsOfService.TermsOfServiceManagerImpl"/>
     <bean class="jetbrains.buildServer.termsOfService.TermsOfServiceConfig"/>
     <bean class="jetbrains.buildServer.termsOfService.TermsOfServicesLink"/>
+    <bean class="jetbrains.buildServer.termsOfService.TermsOfServiceGuestNote"/>
 
 
 </beans>

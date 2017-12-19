@@ -3,9 +3,11 @@ package jetbrains.buildServer.termsOfService;
 import jetbrains.buildServer.serverSide.TeamCityProperties;
 import jetbrains.buildServer.users.PropertyKey;
 import jetbrains.buildServer.users.SUser;
+import jetbrains.buildServer.users.UserModel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,29 +18,66 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
 
     @NotNull
     private final TermsOfServiceConfig myConfig;
+    @NotNull
+    private final UserModel userModel;
 
-    public TermsOfServiceManagerImpl(final @NotNull TermsOfServiceConfig config) {
+    public TermsOfServiceManagerImpl(final @NotNull TermsOfServiceConfig config, @NotNull UserModel userModel) {
         myConfig = config;
-    }
-
-    @Override
-    public boolean mustAccept(@NotNull SUser user) {
-        return TeamCityProperties.getBoolean(TEAMCITY_TERMS_OF_SERVICE_ENABLED_PROPERTY)
-                && getAgreementsFor(user).stream().anyMatch(a -> a.shouldAccept(user) && !a.isAccepted(user));
+        this.userModel = userModel;
     }
 
     @NotNull
     @Override
-    public List<Agreement> getAgreementsFor(@NotNull SUser user) {
-        return myConfig.getAgreements(user).stream().map(AgreementImpl::new).collect(toList());
+    public List<Agreement> getMustAcceptAgreements(@NotNull SUser user) {
+        if (!TeamCityProperties.getBoolean(TEAMCITY_TERMS_OF_SERVICE_ENABLED_PROPERTY)) {
+            return Collections.emptyList();
+        }
+        if (userModel.isGuestUser(user)) {
+            return Collections.emptyList();
+        }
+
+        return getAgreements().stream().filter(a -> !a.isAccepted(user)).collect(toList());
+    }
+
+    @NotNull
+    public List<Agreement> getAgreements() {
+        return myConfig.getAgreements().stream().map(AgreementImpl::new).collect(toList());
     }
 
     @NotNull
     @Override
-    public Optional<Agreement> getAgreement(@NotNull SUser user, @NotNull String id) {
-        return getAgreementsFor(user).stream().filter(a -> a.getId().equals(id)).findFirst();
+    public Optional<Agreement> findAgreement(@NotNull String id) {
+        return getAgreements().stream().filter(a -> a.getId().equals(id)).findFirst();
     }
 
+    @NotNull
+    @Override
+    public Optional<GuestNotice> getGuestNotice() {
+        Optional<TermsOfServiceConfig.GuestNoticeSettings> guestNotice = myConfig.getGuestNotice();
+        if (!guestNotice.isPresent()) {
+            return Optional.empty();
+        }
+
+        Optional<TermsOfServiceConfig.AgreementSettings> agreement = myConfig.getAgreement(guestNotice.get().getAgreementId());
+
+        if (agreement.isPresent()) {
+            return guestNotice.map(s -> new GuestNotice() {
+                @NotNull
+                @Override
+                public String getText() {
+                    return s.getText();
+                }
+
+                @NotNull
+                @Override
+                public String getLink() {
+                    return new AgreementImpl(agreement.get()).getLink();
+                }
+            });
+        } else {
+            return Optional.empty();
+        }
+    }
 
     private static final class AgreementImpl implements Agreement {
 
@@ -77,18 +116,12 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
         public String getLink() {
             return agreementSettings.getLink() != null ?
                     agreementSettings.getLink() :
-                    "/termsOfServices.html?agreement=" + agreementSettings.getId();
+                    ViewTermsOfServiceController.PATH + "?agreement=" + agreementSettings.getId();
         }
 
         @NotNull
-        @Override
-        public PropertyKey getUserPropertyKey() {
+        private PropertyKey getUserPropertyKey() {
             return agreementSettings.getUserPropertyKey();
-        }
-
-        @Override
-        public boolean shouldAccept(@NotNull SUser user) {
-            return TeamCityProperties.getBoolean(TEAMCITY_TERMS_OF_SERVICE_ENABLED_PROPERTY);
         }
 
         @Override

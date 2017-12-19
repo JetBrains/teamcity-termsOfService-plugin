@@ -1,7 +1,5 @@
-<%@ page import="jetbrains.buildServer.web.openapi.PlaceId" %>
 <%@include file="/include-internal.jsp" %>
 <%--@elvariable id="pageUrl" type="java.lang.String"--%>
-<%--@elvariable id="descriptionFile" type="java.lang.String"--%>
 <%--@elvariable id="agreementText" type="java.lang.String"--%>
 <%--@elvariable id="termsOfServiceName" type="java.lang.String"--%>
 <c:set var="name" value="${termsOfServiceName}"/>
@@ -21,11 +19,6 @@
         <c:set var="name" value="${termsOfServiceName}"/>
         <div class="agreementPage">
             <div class="agreement">
-            <c:if test="${not empty descriptionFile}">
-              <div class="description">
-                  <jsp:include page="${descriptionFile}"/>
-              </div>
-            </c:if>
                 ${agreementText}
             </div>
         </div>
