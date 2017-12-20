@@ -1,6 +1,7 @@
 package jetbrains.buildServer.termsOfService;
 
 import jetbrains.buildServer.BaseWebTestCase;
+import jetbrains.buildServer.MockTimeService;
 import jetbrains.buildServer.serverSide.MockServerPluginDescriptior;
 import jetbrains.buildServer.serverSide.impl.BuildServerImpl;
 import jetbrains.buildServer.serverSide.impl.FileWatcherFactory;
@@ -16,6 +17,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,7 @@ public class TermsOfServiceTest extends BaseWebTestCase {
     private TermsOfServiceHandlerInterceptor interceptor;
     private ViewTermsOfServiceController viewAgreementController;
     private AcceptTermsOfServiceController acceptAgreementController;
+    private MockTimeService timeService;
 
     @Override
     @BeforeMethod
@@ -46,6 +49,7 @@ public class TermsOfServiceTest extends BaseWebTestCase {
         interceptor = new TermsOfServiceHandlerInterceptor(termsOfServiceManager);
         acceptAgreementController = new AcceptTermsOfServiceController(myWebManager, new MockServerPluginDescriptior(), termsOfServiceManager);
         viewAgreementController = new ViewTermsOfServiceController(myWebManager, new MockServerPluginDescriptior(), termsOfServiceManager);
+        myRequest.setRemoteAddr("182.22.12.12");
     }
 
     @Override
@@ -59,7 +63,8 @@ public class TermsOfServiceTest extends BaseWebTestCase {
         FileUtil.createIfDoesntExist(myAgreementFile);
         FileUtil.writeFile(myAgreementFile, "Agreement");
         config = new TermsOfServiceConfig(myFixture.getEventDispatcher(), myFixture.getServerPaths(), myFixture.getSingletonService(FileWatcherFactory.class));
-        termsOfServiceManager = new TermsOfServiceManagerImpl(config, myFixture.getUserModel());
+        timeService = new MockTimeService();
+        termsOfServiceManager = new TermsOfServiceManagerImpl(config, myFixture.getUserModel(), timeService);
     }
 
     @Test
@@ -68,6 +73,7 @@ public class TermsOfServiceTest extends BaseWebTestCase {
                 "    <agreement id=\"hosted_teamcity\">\n" +
                 "        <parameters>\n" +
                 "          \t<param name=\"agreement-file\" value=\"agreement.html\"/>\n" +
+                "          \t<param name=\"version\" value=\"2017.1\"/>\n" +
                 "            <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
                 "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
                 "        </parameters>\n" +
@@ -91,6 +97,9 @@ public class TermsOfServiceTest extends BaseWebTestCase {
         acceptAgreementController.doHandle(myRequest, myResponse);
         then(termsOfServiceManager.getMustAcceptAgreements(user)).hasSize(0);
         then(termsOfServiceManager.getAgreements()).allMatch(a -> a.isAccepted(user));
+        then(user).hasProperty("teamcity.policy.hosted_teamcity.acceptedVersion", "2017.1");
+        then(user).hasProperty("teamcity.policy.hosted_teamcity.acceptedFromIP", myRequest.getRemoteAddr());
+        then(user).hasProperty("teamcity.policy.hosted_teamcity.acceptedDate", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(timeService.getNow()));
 
         then(interceptor.preHandle(myRequest, myResponse)).isTrue();
         myRequest.addParameters("agreement", "hosted_teamcity");
@@ -113,7 +122,7 @@ public class TermsOfServiceTest extends BaseWebTestCase {
                         "</terms-of-service-config>");
         makeLoggedIn(createUser("user"));
 
-        then(interceptor.preHandle(myRequest, myResponse)).isFalse();
+        then(interceptor.preHandle(myRequest, myResponse)).isTrue();
 
         myRequest.addParameters("agreement", "hosted_teamcity");
         myRequest.setMethod("GET");

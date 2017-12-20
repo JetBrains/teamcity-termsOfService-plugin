@@ -6,8 +6,6 @@ import jetbrains.buildServer.serverSide.BuildServerListener;
 import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.serverSide.TeamCityProperties;
 import jetbrains.buildServer.serverSide.impl.FileWatcherFactory;
-import jetbrains.buildServer.users.PropertyKey;
-import jetbrains.buildServer.users.SimplePropertyKey;
 import jetbrains.buildServer.util.*;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -119,6 +117,7 @@ public class TermsOfServiceConfig {
 
         private final String id;
         private final Map<String, String> params;
+        private String version;
 
         AgreementSettings(@NotNull String id, @NotNull Map<String, String> params) {
             this.id = id;
@@ -128,6 +127,11 @@ public class TermsOfServiceConfig {
         @NotNull
         public String getId() {
             return id;
+        }
+
+        @NotNull
+        public String getVersion() {
+            return params.getOrDefault("version", "1");
         }
 
         @NotNull
@@ -161,9 +165,8 @@ public class TermsOfServiceConfig {
             return params.get("agreement-link");
         }
 
-        @NotNull
-        public PropertyKey getUserPropertyKey() {
-            return new SimplePropertyKey(".teamcity.userTermsOfServices.accepted");
+        public boolean getForceAccept() {
+            return Boolean.parseBoolean(params.getOrDefault("force-accept", "true"));
         }
     }
 

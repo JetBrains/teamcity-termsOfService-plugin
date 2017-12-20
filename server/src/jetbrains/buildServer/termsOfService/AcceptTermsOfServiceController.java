@@ -81,7 +81,7 @@ public class AcceptTermsOfServiceController extends BaseController {
 
     private ModelAndView accept(@NotNull SUser user, @NotNull TermsOfServiceManager.Agreement agreement,
                                 @NotNull HttpServletRequest request, @NotNull HttpServletResponse response) throws IOException {
-        agreement.accept(user);
+        agreement.accept(user, request);
         String next = RememberUrl.readAndForget(request);
         if (next == null) {
             next = OverviewController.getOverviewPageUrl(request);

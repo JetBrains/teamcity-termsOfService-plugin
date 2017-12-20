@@ -1,11 +1,10 @@
 package jetbrains.buildServer.termsOfService;
 
-import com.intellij.openapi.diagnostic.Logger;
-import jetbrains.buildServer.users.PropertyKey;
 import jetbrains.buildServer.users.SUser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,7 +41,9 @@ public interface TermsOfServiceManager {
 
         boolean isAccepted(@NotNull SUser user);
 
-        void accept(@NotNull SUser user);
+        boolean shouldAccept(@NotNull SUser user);
+
+        void accept(@NotNull SUser user, @NotNull HttpServletRequest request);
     }
 
     interface GuestNotice {

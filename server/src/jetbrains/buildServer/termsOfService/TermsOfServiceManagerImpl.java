@@ -1,12 +1,16 @@
 package jetbrains.buildServer.termsOfService;
 
 import jetbrains.buildServer.serverSide.TeamCityProperties;
-import jetbrains.buildServer.users.PropertyKey;
 import jetbrains.buildServer.users.SUser;
+import jetbrains.buildServer.users.SimplePropertyKey;
 import jetbrains.buildServer.users.UserModel;
+import jetbrains.buildServer.util.TimeService;
+import jetbrains.buildServer.web.util.WebUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.servlet.http.HttpServletRequest;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -20,10 +24,14 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
     private final TermsOfServiceConfig myConfig;
     @NotNull
     private final UserModel userModel;
+    @NotNull
+    private final TimeService timeService;
 
-    public TermsOfServiceManagerImpl(final @NotNull TermsOfServiceConfig config, @NotNull UserModel userModel) {
+    public TermsOfServiceManagerImpl(final @NotNull TermsOfServiceConfig config, @NotNull UserModel userModel,
+                                     @NotNull TimeService timeService) {
         myConfig = config;
         this.userModel = userModel;
+        this.timeService = timeService;
     }
 
     @NotNull
@@ -36,7 +44,7 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
             return Collections.emptyList();
         }
 
-        return getAgreements().stream().filter(a -> !a.isAccepted(user)).collect(toList());
+        return getAgreements().stream().filter(a -> !a.isAccepted(user) && a.shouldAccept(user)).collect(toList());
     }
 
     @NotNull
@@ -79,7 +87,7 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
         }
     }
 
-    private static final class AgreementImpl implements Agreement {
+    private final class AgreementImpl implements Agreement {
 
         private final TermsOfServiceConfig.AgreementSettings agreementSettings;
 
@@ -119,19 +127,20 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
                     ViewTermsOfServiceController.PATH + "?agreement=" + agreementSettings.getId();
         }
 
-        @NotNull
-        private PropertyKey getUserPropertyKey() {
-            return agreementSettings.getUserPropertyKey();
-        }
-
         @Override
         public boolean isAccepted(@NotNull SUser user) {
-            return user.getBooleanProperty(getUserPropertyKey());
+            return user.getPropertyValue(new SimplePropertyKey("teamcity.policy." + agreementSettings.getId() + ".acceptedVersion")) != null;
+        }
+
+        public boolean shouldAccept(@NotNull SUser user) {
+            return agreementSettings.getForceAccept();
         }
 
         @Override
-        public void accept(@NotNull SUser user) {
-            user.setUserProperty(getUserPropertyKey(), "true");
+        public void accept(@NotNull SUser user, @NotNull HttpServletRequest request) {
+            user.setUserProperty(new SimplePropertyKey("teamcity.policy." + agreementSettings.getId() + ".acceptedVersion"), agreementSettings.getVersion());
+            user.setUserProperty(new SimplePropertyKey("teamcity.policy." + agreementSettings.getId() + ".acceptedDate"), new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(timeService.now()));
+            user.setUserProperty(new SimplePropertyKey("teamcity.policy." + agreementSettings.getId() + ".acceptedFromIP"), WebUtil.getRemoteAddress(request));
         }
 
         @Override
