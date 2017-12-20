@@ -110,6 +110,50 @@ public class TermsOfServiceTest extends BaseWebTestCase {
     }
 
     @Test
+    public void should_support_version_changes() throws Exception {
+        writeConfig("<terms-of-service-config>\n" +
+                "    <agreement id=\"hosted_teamcity\">\n" +
+                "        <parameters>\n" +
+                "          \t<param name=\"agreement-file\" value=\"agreement.html\"/>\n" +
+                "          \t<param name=\"version\" value=\"2017.1\"/>\n" +
+                "            <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
+                "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
+                "        </parameters>\n" +
+                "    </agreement>\n" +
+                "</terms-of-service-config>");
+
+        SUser user = createUser("user1");
+        makeLoggedIn(user);
+
+        myRequest.addParameters("agreement", "hosted_teamcity");
+        myRequest.setMethod("POST");
+        acceptAgreementController.doHandle(myRequest, myResponse);
+        then(interceptor.preHandle(myRequest, myResponse)).isTrue();
+
+
+        writeConfig("<terms-of-service-config>\n" +
+                "    <agreement id=\"hosted_teamcity\">\n" +
+                "        <parameters>\n" +
+                "          \t<param name=\"agreement-file\" value=\"agreement.html\"/>\n" +
+                "          \t<param name=\"version\" value=\"2017.2\"/>\n" +
+                "            <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
+                "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
+                "        </parameters>\n" +
+                "    </agreement>\n" +
+                "</terms-of-service-config>");
+        myRequest.addParameters("agreement", "hosted_teamcity");
+        myRequest.setMethod("GET");
+
+        then(interceptor.preHandle(myRequest, myResponse)).isFalse(); //new version was not accepted
+
+        myRequest.addParameters("agreement", "hosted_teamcity");
+        myRequest.setMethod("POST");
+        acceptAgreementController.doHandle(myRequest, myResponse);
+
+        then(interceptor.preHandle(myRequest, myResponse)).isTrue();
+    }
+
+    @Test
     public void should_support_links_to_external_agreements_which_user_must_not_accept_but_can_review() throws Exception {
         writeConfig("<terms-of-service-config>\n" +
                         "    <agreement id=\"hosted_teamcity\">\n" +

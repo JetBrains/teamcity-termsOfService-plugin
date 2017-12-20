@@ -5,6 +5,7 @@ import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.users.SimplePropertyKey;
 import jetbrains.buildServer.users.UserModel;
 import jetbrains.buildServer.util.TimeService;
+import jetbrains.buildServer.util.VersionComparatorUtil;
 import jetbrains.buildServer.web.util.WebUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -129,7 +130,8 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
 
         @Override
         public boolean isAccepted(@NotNull SUser user) {
-            return user.getPropertyValue(new SimplePropertyKey("teamcity.policy." + agreementSettings.getId() + ".acceptedVersion")) != null;
+            String acceptedVersion = user.getPropertyValue(new SimplePropertyKey("teamcity.policy." + agreementSettings.getId() + ".acceptedVersion"));
+            return acceptedVersion != null && VersionComparatorUtil.compare( acceptedVersion, agreementSettings.getVersion()) >= 0;
         }
 
         public boolean shouldAccept(@NotNull SUser user) {
