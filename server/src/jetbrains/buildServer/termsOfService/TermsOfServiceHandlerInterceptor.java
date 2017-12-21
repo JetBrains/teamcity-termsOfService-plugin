@@ -1,6 +1,7 @@
 package jetbrains.buildServer.termsOfService;
 
 
+import jetbrains.buildServer.controllers.interceptors.PathSet;
 import jetbrains.buildServer.controllers.interceptors.TeamCityHandlerInterceptor;
 import jetbrains.buildServer.controllers.login.RememberUrl;
 import jetbrains.buildServer.users.SUser;
@@ -17,8 +18,16 @@ public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerIntercep
     @NotNull
     private final TermsOfServiceManager myManager;
 
+    @NotNull
+    private final PathSet myNonMemorizablePaths = new PathSet();
+
     public TermsOfServiceHandlerInterceptor(@NotNull TermsOfServiceManager manager) {
         myManager = manager;
+    }
+
+    public void setNonMemorizablePaths(final List<String> nonMemorizablePaths) {
+        myNonMemorizablePaths.clear();
+        myNonMemorizablePaths.addAll(nonMemorizablePaths);
     }
 
     public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response) throws Exception {
@@ -48,7 +57,9 @@ public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerIntercep
             String requestUrl = WebUtil.getRequestUrl(request);
             String entryPoint = AcceptTermsOfServiceController.PATH + "?agreement=" + agreement.getId();
             TermsOfServiceLogger.LOGGER.debug(String.format("Will redirect to %s. Remembered original request url %s", entryPoint, requestUrl));
-            RememberUrl.remember(request, requestUrl);
+            if (!myNonMemorizablePaths.matches(path)) {
+                RememberUrl.remember(request, requestUrl);
+            }
             response.sendRedirect(request.getContextPath() + entryPoint);
             return false;
         }
