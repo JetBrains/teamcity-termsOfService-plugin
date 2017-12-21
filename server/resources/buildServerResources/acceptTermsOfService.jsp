@@ -25,6 +25,10 @@
         <p>You must accept the ${name} to proceed.</p>
         <form action="${pageUrl}" method="post" onsubmit="if (!this.accept.checked) { alert('Please accept the ${name}'); return false; };">
           <p><forms:checkbox name="accept"/><label for="accept" class="rightLabel">Accept ${name}</label></p>
+          <c:forEach var="consent" items="${consents}">
+            <%--@elvariable id="consent" type="jetbrains.buildServer.termsOfService.TermsOfServiceManager.Consent"--%>
+            <p><forms:checkbox name="${consent.id}" checked="${consent.checkedByDefault}"/><label for="${consent.id}" class="rightLabel">${consent.text}</label></p>
+          </c:forEach>
           <ext:includeExtensions placeId="<%=PlaceId.ACCEPT_LICENSE_SETTING%>"/>
           <div class="continueBlock">
             <forms:submit label="Continue &raquo;" name="Continue" disabled="${true}"/>

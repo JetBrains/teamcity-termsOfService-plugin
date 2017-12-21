@@ -39,11 +39,16 @@ public interface TermsOfServiceManager {
         @NotNull
         String getLink();
 
+        @NotNull
+        List<Consent> getConsents();
+
         boolean isAccepted(@NotNull SUser user);
 
         boolean shouldAccept(@NotNull SUser user);
 
         void accept(@NotNull SUser user, @NotNull HttpServletRequest request);
+
+        void changeConsentState(@NotNull SUser user, @NotNull String consentId, boolean agreed, @NotNull HttpServletRequest request);
     }
 
     interface GuestNotice {
@@ -52,5 +57,15 @@ public interface TermsOfServiceManager {
 
         @NotNull
         String getLink();
+    }
+
+    interface Consent {
+        @NotNull
+        String getId();
+
+        boolean isCheckedByDefault();
+
+        @NotNull
+        String getText();
     }
 }

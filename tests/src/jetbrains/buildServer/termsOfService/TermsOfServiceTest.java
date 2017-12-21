@@ -154,6 +154,51 @@ public class TermsOfServiceTest extends BaseWebTestCase {
     }
 
     @Test
+    public void should_support_configurable_list_of_consents() throws Exception {
+        writeConfig("<terms-of-service-config>\n" +
+                "    <agreement id=\"hosted_teamcity\">\n" +
+                "        <parameters>\n" +
+                "          \t<param name=\"agreement-file\" value=\"agreement.html\"/>\n" +
+                "          \t<param name=\"version\" value=\"2017.1\"/>\n" +
+                "            <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
+                "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
+                "        </parameters>\n" +
+                "        <consents>\n" +
+                "          \t<consent id=\"analytics\" text=\"Allow analytics\" checked=\"true\"/>\n" +
+                "          \t<consent id=\"marketing\" text=\"Allow marketing\" checked=\"false\"/>\n" +
+                "        </consents>\n" +
+                "    </agreement>\n" +
+                "</terms-of-service-config>");
+
+        SUser user = createUser("user1");
+        makeLoggedIn(user);
+
+        then(interceptor.preHandle(myRequest, myResponse)).isFalse();
+        then(myResponse).isRedirectTo(myRequest.getContextPath() + "/acceptTermsOfServices.html?agreement=hosted_teamcity");
+
+        myRequest.addParameters("agreement", "hosted_teamcity");
+        myRequest.setMethod("GET");
+        ModelAndView modelAndView = acceptAgreementController.doHandle(myRequest, myResponse);
+        then(((List<TermsOfServiceManager.Consent>) modelAndView.getModel().get("consents"))).extracting(TermsOfServiceManager.Consent::getId).contains("analytics", "marketing");
+
+
+        myRequest.addParameters("agreement", "hosted_teamcity", "analytics", "true");
+        myRequest.setMethod("POST");
+        acceptAgreementController.doHandle(myRequest, myResponse);
+        then(termsOfServiceManager.getMustAcceptAgreements(user)).hasSize(0);
+        then(user).hasProperty("teamcity.policy.hosted_teamcity.acceptedVersion", "2017.1");
+        then(user).hasProperty("teamcity.policy.hosted_teamcity.acceptedFromIP", myRequest.getRemoteAddr());
+        then(user).hasProperty("teamcity.policy.hosted_teamcity.acceptedDate", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(timeService.getNow()));
+        then(user).hasProperty("teamcity.policy.hosted_teamcity.consent.analytics.accepted", "true");
+        then(user).hasProperty("teamcity.policy.hosted_teamcity.consent.analytics.acceptedDate", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(timeService.getNow()));
+        then(user).hasProperty("teamcity.policy.hosted_teamcity.consent.analytics.acceptedFromIP", myRequest.getRemoteAddr());
+        then(user).doesNotHaveProperty("teamcity.policy.hosted_teamcity.consent.marketing.accepted");
+        then(user).doesNotHaveProperty("teamcity.policy.hosted_teamcity.consent.marketing.acceptedDate");
+        then(user).doesNotHaveProperty("teamcity.policy.hosted_teamcity.consent.marketing.acceptedFromIP");
+    }
+
+
+    @Test
     public void should_support_links_to_external_agreements_which_user_must_not_accept_but_can_review() throws Exception {
         writeConfig("<terms-of-service-config>\n" +
                         "    <agreement id=\"hosted_teamcity\">\n" +

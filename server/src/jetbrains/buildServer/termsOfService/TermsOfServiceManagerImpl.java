@@ -128,6 +128,12 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
                     ViewTermsOfServiceController.PATH + "?agreement=" + agreementSettings.getId();
         }
 
+        @NotNull
+        @Override
+        public List<Consent> getConsents() {
+            return agreementSettings.getConsents();
+        }
+
         @Override
         public boolean isAccepted(@NotNull SUser user) {
             String acceptedVersion = user.getPropertyValue(new SimplePropertyKey("teamcity.policy." + agreementSettings.getId() + ".acceptedVersion"));
@@ -143,6 +149,19 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
             user.setUserProperty(new SimplePropertyKey("teamcity.policy." + agreementSettings.getId() + ".acceptedVersion"), agreementSettings.getVersion());
             user.setUserProperty(new SimplePropertyKey("teamcity.policy." + agreementSettings.getId() + ".acceptedDate"), new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(timeService.now()));
             user.setUserProperty(new SimplePropertyKey("teamcity.policy." + agreementSettings.getId() + ".acceptedFromIP"), WebUtil.getRemoteAddress(request));
+        }
+
+        @Override
+        public void changeConsentState(@NotNull SUser user, @NotNull String consentId, boolean agreed, @NotNull HttpServletRequest request) {
+            if (agreed) {
+                user.setUserProperty(new SimplePropertyKey("teamcity.policy." + agreementSettings.getId() + ".consent." + consentId + ".accepted"), "true");
+                user.setUserProperty(new SimplePropertyKey("teamcity.policy." + agreementSettings.getId() + ".consent." + consentId + ".acceptedDate"), new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(timeService.now()));
+                user.setUserProperty(new SimplePropertyKey("teamcity.policy." + agreementSettings.getId() + ".consent." + consentId + ".acceptedFromIP"), WebUtil.getRemoteAddress(request));
+            } else {
+                user.deleteUserProperty(new SimplePropertyKey("teamcity.policy." + agreementSettings.getId() + ".consent." + consentId + ".accepted"));
+                user.deleteUserProperty(new SimplePropertyKey("teamcity.policy." + agreementSettings.getId() + ".consent." + consentId + ".acceptedDate"));
+                user.deleteUserProperty(new SimplePropertyKey("teamcity.policy." + agreementSettings.getId() + ".consent." + consentId + ".acceptedFromIP"));
+            }
         }
 
         @Override

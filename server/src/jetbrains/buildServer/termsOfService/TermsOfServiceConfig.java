@@ -7,6 +7,7 @@ import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.serverSide.TeamCityProperties;
 import jetbrains.buildServer.serverSide.impl.FileWatcherFactory;
 import jetbrains.buildServer.util.*;
+import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jetbrains.annotations.NotNull;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.intellij.openapi.util.text.StringUtil.isNotEmpty;
 import static java.util.Collections.emptyMap;
 
 @ThreadSafe
@@ -86,7 +88,20 @@ public class TermsOfServiceConfig {
                     Element paramsElement = ((Element) agreementEl).getChild("parameters");
                     Map<String, String> params = paramsElement == null ? emptyMap() : XmlUtil.readParameters(paramsElement);
                     if (params.get("agreement-file") != null || params.get("agreement-link") != null) {
-                        AgreementSettings agreementSettings = new AgreementSettings(((Element) agreementEl).getAttributeValue("id"), params);
+                        List<TermsOfServiceManager.Consent> consents = new ArrayList<>();
+                        Element consentsEl = ((Element) agreementEl).getChild("consents");
+                        if (consentsEl != null) {
+                            for (Object consent : consentsEl.getChildren("consent")) {
+                                Element consentEl = ((Element) consent);
+                                String id = consentEl.getAttributeValue("id");
+                                String text = consentEl.getAttributeValue("text");
+                                boolean checked = Boolean.parseBoolean(consentEl.getAttributeValue("checked"));
+                                if (isNotEmpty(id) && isNotEmpty(text)) {
+                                    consents.add(new ConsentSettings(id, text, checked));
+                                }
+                            }
+                        }
+                        AgreementSettings agreementSettings = new AgreementSettings(((Element) agreementEl).getAttributeValue("id"), params, consents);
                         myAgreements.add(agreementSettings);
                     }
                 }
@@ -117,11 +132,12 @@ public class TermsOfServiceConfig {
 
         private final String id;
         private final Map<String, String> params;
-        private String version;
+        private final List<TermsOfServiceManager.Consent> consents;
 
-        AgreementSettings(@NotNull String id, @NotNull Map<String, String> params) {
+        AgreementSettings(@NotNull String id, @NotNull Map<String, String> params, List<TermsOfServiceManager.Consent> consents) {
             this.id = id;
             this.params = params;
+            this.consents = consents;
         }
 
         @NotNull
@@ -168,6 +184,11 @@ public class TermsOfServiceConfig {
         public boolean getForceAccept() {
             return Boolean.parseBoolean(params.getOrDefault("force-accept", "true"));
         }
+
+        @NotNull
+        public List<TermsOfServiceManager.Consent> getConsents() {
+            return consents;
+        }
     }
 
     class GuestNoticeSettings {
@@ -185,6 +206,35 @@ public class TermsOfServiceConfig {
 
         public String getAgreementId() {
             return agreementId;
+        }
+    }
+
+    class ConsentSettings implements TermsOfServiceManager.Consent {
+        @NotNull private final String id;
+        @NotNull private final String text;
+        private final boolean checked;
+
+        ConsentSettings(@NotNull String id, @NotNull String text, boolean checked) {
+            this.id = id;
+            this.text = text;
+            this.checked = checked;
+        }
+
+        @NotNull
+        @Override
+        public String getId() {
+            return id;
+        }
+
+        @Override
+        public boolean isCheckedByDefault() {
+            return checked;
+        }
+
+        @NotNull
+        @Override
+        public String getText() {
+            return text;
         }
     }
 }

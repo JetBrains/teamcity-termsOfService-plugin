@@ -4,6 +4,7 @@ import jetbrains.buildServer.controllers.BaseController;
 import jetbrains.buildServer.controllers.login.RememberUrl;
 import jetbrains.buildServer.controllers.overview.OverviewController;
 import jetbrains.buildServer.users.SUser;
+import jetbrains.buildServer.util.StringUtil;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import jetbrains.buildServer.web.util.SessionUser;
@@ -75,6 +76,7 @@ public class AcceptTermsOfServiceController extends BaseController {
         }
         view.addObject("agreementText", agreement.getText());
         view.addObject("termsOfServiceName", agreement.getFullName());
+        view.addObject("consents", agreement.getConsents());
         return view;
     }
 
@@ -82,6 +84,13 @@ public class AcceptTermsOfServiceController extends BaseController {
     private ModelAndView accept(@NotNull SUser user, @NotNull TermsOfServiceManager.Agreement agreement,
                                 @NotNull HttpServletRequest request, @NotNull HttpServletResponse response) throws IOException {
         agreement.accept(user, request);
+
+        for (TermsOfServiceManager.Consent consent : agreement.getConsents()) {
+            if (request.getParameter(consent.getId()) != null) {
+                agreement.changeConsentState(user, consent.getId(), true, request);
+            }
+        }
+
         String next = RememberUrl.readAndForget(request);
         if (next == null) {
             next = OverviewController.getOverviewPageUrl(request);
