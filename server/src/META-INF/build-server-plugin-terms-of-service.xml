@@ -7,6 +7,38 @@
 
     <bean class="jetbrains.buildServer.termsOfService.TermsOfServiceHandlerInterceptor" lazy-init="false">
         <constructor-arg ref="userServiceTermsManager"/>
+        <property name="nonMemorizablePaths">
+            <list>
+                <value>/ajax.html</value>
+                <value>/app/subscriptions/**</value>
+                <value>/app/rest/**</value>
+                <value>/action.html</value>
+                <value>/subscriptions.html</value>
+                <value>/changesPopup.html</value>
+                <value>/changesPopupTab.html</value>
+                <value>/filesPopup.html</value>
+                <value>/allProjects.html</value>
+                <value>/externalStatus.html</value>
+                <value>/visibleProjects.html</value>
+                <value>/visibleBuildTypes.html</value>
+                <value>/showCompatibleAgents.html</value>
+                <value>/admin/action.html</value>
+                <value>/buildGraph.html</value>
+                <value>/showAgreement.html</value>
+                <value>/queuedBuilds.html</value>
+                <value>/viewDependentArtifactsPopup.html</value>
+                <value>/runBuild.html</value>
+                <value>/promotionGraph.html</value>
+                <value>/promoDetailsPopup.html</value>
+                <value>/tz.html</value>
+                <value>/authenticationTest.html</value>
+
+                <!--The next path are here only for backwars compatibility.
+                See jetbrains.buildServer.controllers.obsolete.EventTrackerController-->
+                <value>/eventTracker.html</value>
+                <value>/serverStatistics.html</value>
+            </list>
+        </property>
     </bean>
 
     <bean id="userServiceTermsController" class="jetbrains.buildServer.termsOfService.TermsOfServiceController">
