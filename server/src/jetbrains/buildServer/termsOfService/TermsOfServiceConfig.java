@@ -6,8 +6,8 @@ import jetbrains.buildServer.serverSide.BuildServerListener;
 import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.serverSide.TeamCityProperties;
 import jetbrains.buildServer.serverSide.impl.FileWatcherFactory;
+import jetbrains.buildServer.termsOfService.TermsOfServiceManager.ExternalAgreementLink;
 import jetbrains.buildServer.util.*;
-import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jetbrains.annotations.NotNull;
@@ -29,6 +29,8 @@ public class TermsOfServiceConfig {
     private static final String CONFIG_FILE = "terms-of-service-config.xml";
 
     private final List<AgreementSettings> myAgreements = new ArrayList<>();
+
+    private final List<ExternalAgreementLink> externalAgreements = new ArrayList<>();
     private Optional<GuestNoticeSettings> myGuestNotice = Optional.empty();
 
     private final File myConfigDir;
@@ -69,6 +71,11 @@ public class TermsOfServiceConfig {
     }
 
     @NotNull
+    public synchronized List<ExternalAgreementLink> getExternalAgreements() {
+        return externalAgreements;
+    }
+
+    @NotNull
     public synchronized Optional<GuestNoticeSettings> getGuestNotice() {
         return myGuestNotice;
     }
@@ -77,6 +84,7 @@ public class TermsOfServiceConfig {
         try {
             if (mySettingsFile.exists()) {
                 myAgreements.clear();
+                externalAgreements.clear();
                 Element parsed = FileUtil.parseDocument(mySettingsFile, false);
                 List agreementsEls = parsed.getChildren("agreement");
 
@@ -87,7 +95,7 @@ public class TermsOfServiceConfig {
                 for (Object agreementEl : agreementsEls) {
                     Element paramsElement = ((Element) agreementEl).getChild("parameters");
                     Map<String, String> params = paramsElement == null ? emptyMap() : XmlUtil.readParameters(paramsElement);
-                    if (params.get("agreement-file") != null || params.get("agreement-link") != null) {
+                    if (params.get("agreement-file") != null) {
                         List<TermsOfServiceManager.Consent> consents = new ArrayList<>();
                         Element consentsEl = ((Element) agreementEl).getChild("consents");
                         if (consentsEl != null) {
@@ -106,6 +114,9 @@ public class TermsOfServiceConfig {
                     }
                 }
 
+                for (Object agreementEl : parsed.getChildren("externalAgreementLink")) {
+                    externalAgreements.add(new ExternalAgreementLinkSettings(((Element) agreementEl).getAttributeValue("text"), ((Element) agreementEl).getAttributeValue("url")));
+                }
 
                 GuestNoticeSettings guestNoticeSettings = null;
                 Element guestNoticeEl = parsed.getChild("guest-notice");
@@ -181,13 +192,31 @@ public class TermsOfServiceConfig {
             return params.get("agreement-link");
         }
 
-        public boolean getForceAccept() {
-            return Boolean.parseBoolean(params.getOrDefault("force-accept", "true"));
-        }
-
         @NotNull
         public List<TermsOfServiceManager.Consent> getConsents() {
             return consents;
+        }
+    }
+
+    class ExternalAgreementLinkSettings implements ExternalAgreementLink{
+        private final String text;
+        private final String url;
+
+        ExternalAgreementLinkSettings(String text, String url) {
+            this.text = text;
+            this.url = url;
+        }
+
+        @NotNull
+        @Override
+        public String getName() {
+            return text;
+        }
+
+        @NotNull
+        @Override
+        public String getUrl() {
+            return url;
         }
     }
 

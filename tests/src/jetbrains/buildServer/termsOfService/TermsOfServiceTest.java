@@ -197,32 +197,6 @@ public class TermsOfServiceTest extends BaseWebTestCase {
         then(user).doesNotHaveProperty("teamcity.policy.hosted_teamcity.consent.marketing.acceptedFromIP");
     }
 
-
-    @Test
-    public void should_support_links_to_external_agreements_which_user_must_not_accept_but_can_review() throws Exception {
-        writeConfig("<terms-of-service-config>\n" +
-                        "    <agreement id=\"hosted_teamcity\">\n" +
-                        "        <parameters>\n" +
-                        "          \t<param name=\"agreement-link\" value=\"http://jetbrains.com/agreement.html\"/>\n" +
-                        "            <param name=\"force-accept\" value=\"false\"/>\n" +
-                        "            <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
-                        "        </parameters>\n" +
-                        "    </agreement>\n" +
-                        "</terms-of-service-config>");
-        makeLoggedIn(createUser("user"));
-
-        then(interceptor.preHandle(myRequest, myResponse)).isTrue();
-
-        myRequest.addParameters("agreement", "hosted_teamcity");
-        myRequest.setMethod("GET");
-        ModelAndView modelAndView = viewAgreementController.doHandle(myRequest, myResponse);
-        Assert.assertEquals(modelAndView.getView().getClass(), RedirectView.class);
-
-        then((List<TermsOfServiceManager.Agreement>) linksExtension().get("agreements"))
-                .extracting("link")
-                .containsOnly("http://jetbrains.com/agreement.html");
-    }
-
     @Test
     public void should_support_several_agreements_one_of_which_user_must_accept() throws Exception {
         writeConfig("<terms-of-service-config>\n" +
@@ -233,14 +207,8 @@ public class TermsOfServiceTest extends BaseWebTestCase {
                         "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
                         "        </parameters>\n" +
                         "    </agreement>\n" +
-                        "    <agreement id=\"privacy_policy\">\n" +
-                        "        <parameters>\n" +
-                        "           \t<param name=\"agreement-link\" value=\"https://www.jetbrains.com/company/privacy.html\"/>\n" +
-                        "            <param name=\"force-accept\" value=\"false\"/>\n" +
-                        "            <param name=\"short-name\" value=\"Privacy Policy\"/>\n" +
-                        "        </parameters>\n" +
-                        "    </agreement>\n" +
-                        "</terms-of-service-config>");
+                        "    <externalAgreementLink name=\"Terms of Service\" url=\"https://www.jetbrains.com/company/privacy.html\"/>\n" +
+                    "</terms-of-service-config>");
 
         makeLoggedIn(createUser("user"));
 
@@ -260,9 +228,13 @@ public class TermsOfServiceTest extends BaseWebTestCase {
         then(interceptor.preHandle(myRequest, myResponse)).isTrue();
 
         then((List<TermsOfServiceManager.Agreement>) linksExtension().get("agreements"))
-                .hasSize(2)
+                .hasSize(1)
                 .extracting("link")
-                .contains("https://www.jetbrains.com/company/privacy.html", "/viewTermsOfServices.html?agreement=hosted_teamcity");
+                .contains("/viewTermsOfServices.html?agreement=hosted_teamcity");
+        then((List<TermsOfServiceManager.Agreement>) linksExtension().get("externalAgreements"))
+                .hasSize(1)
+                .extracting("url")
+                .contains("https://www.jetbrains.com/company/privacy.html");
     }
 
 
@@ -271,8 +243,9 @@ public class TermsOfServiceTest extends BaseWebTestCase {
         writeConfig("<terms-of-service-config>\n" +
                 "    <agreement id=\"privacy_policy\">\n" +
                 "        <parameters>\n" +
-                "          \t<param name=\"agreement-link\" value=\"https://www.jetbrains.com/company/privacy.html\"/>\n" +
+                "          \t<param name=\"agreement-file\" value=\"agreement.html\"/>\n" +
                 "            <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
+                "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
                 "        </parameters>\n" +
                 "    </agreement>\n" +
                 "    <guest-notice>\n" +
@@ -290,7 +263,7 @@ public class TermsOfServiceTest extends BaseWebTestCase {
 
         then((List<TermsOfServiceManager.Agreement>) linksExtension().get("agreements"))
                 .extracting("link")
-                .containsOnly("https://www.jetbrains.com/company/privacy.html");
+                .containsOnly("/viewTermsOfServices.html?agreement=privacy_policy");
 
         then(((TermsOfServiceManager.GuestNotice) guestNoteExtension().get("guestNotice")).getText())
                 .isEqualTo("A privacy reminder from JetBrains");

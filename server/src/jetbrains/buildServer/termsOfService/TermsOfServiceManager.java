@@ -20,6 +20,9 @@ public interface TermsOfServiceManager {
     Optional<Agreement> findAgreement(@NotNull String id);
 
     @NotNull
+    List<ExternalAgreementLink> getExternalAgreements();
+
+    @NotNull
     Optional<GuestNotice> getGuestNotice();
 
     interface Agreement {
@@ -44,8 +47,6 @@ public interface TermsOfServiceManager {
 
         boolean isAccepted(@NotNull SUser user);
 
-        boolean shouldAccept(@NotNull SUser user);
-
         void accept(@NotNull SUser user, @NotNull HttpServletRequest request);
 
         void changeConsentState(@NotNull SUser user, @NotNull String consentId, boolean agreed, @NotNull HttpServletRequest request);
@@ -67,5 +68,13 @@ public interface TermsOfServiceManager {
 
         @NotNull
         String getText();
+    }
+
+    interface ExternalAgreementLink {
+        @NotNull
+        String getName();
+
+        @NotNull
+        String getUrl();
     }
 }

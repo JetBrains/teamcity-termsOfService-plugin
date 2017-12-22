@@ -10,6 +10,7 @@ import jetbrains.buildServer.web.util.WebUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.concurrent.ThreadSafe;
 import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -18,6 +19,7 @@ import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
+@ThreadSafe
 public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
     static final String TEAMCITY_TERMS_OF_SERVICE_ENABLED_PROPERTY = "teamcity.termsOfService.enabled";
 
@@ -28,7 +30,8 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
     @NotNull
     private final TimeService timeService;
 
-    public TermsOfServiceManagerImpl(final @NotNull TermsOfServiceConfig config, @NotNull UserModel userModel,
+    public TermsOfServiceManagerImpl(@NotNull TermsOfServiceConfig config,
+                                     @NotNull UserModel userModel,
                                      @NotNull TimeService timeService) {
         myConfig = config;
         this.userModel = userModel;
@@ -45,7 +48,7 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
             return Collections.emptyList();
         }
 
-        return getAgreements().stream().filter(a -> !a.isAccepted(user) && a.shouldAccept(user)).collect(toList());
+        return getAgreements().stream().filter(a -> !a.isAccepted(user)).collect(toList());
     }
 
     @NotNull
@@ -57,6 +60,12 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
     @Override
     public Optional<Agreement> findAgreement(@NotNull String id) {
         return getAgreements().stream().filter(a -> a.getId().equals(id)).findFirst();
+    }
+
+    @NotNull
+    @Override
+    public List<ExternalAgreementLink> getExternalAgreements() {
+        return myConfig.getExternalAgreements();
     }
 
     @NotNull
@@ -137,11 +146,7 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
         @Override
         public boolean isAccepted(@NotNull SUser user) {
             String acceptedVersion = user.getPropertyValue(new SimplePropertyKey("teamcity.policy." + agreementSettings.getId() + ".acceptedVersion"));
-            return acceptedVersion != null && VersionComparatorUtil.compare( acceptedVersion, agreementSettings.getVersion()) >= 0;
-        }
-
-        public boolean shouldAccept(@NotNull SUser user) {
-            return agreementSettings.getForceAccept();
+            return acceptedVersion != null && VersionComparatorUtil.compare(acceptedVersion, agreementSettings.getVersion()) >= 0;
         }
 
         @Override
