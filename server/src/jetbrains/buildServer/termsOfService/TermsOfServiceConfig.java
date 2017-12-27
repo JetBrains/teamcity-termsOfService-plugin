@@ -1,6 +1,7 @@
 package jetbrains.buildServer.termsOfService;
 
 import jetbrains.buildServer.configuration.FileWatcher;
+import jetbrains.buildServer.configuration.FilesWatcher;
 import jetbrains.buildServer.serverSide.BuildServerAdapter;
 import jetbrains.buildServer.serverSide.BuildServerListener;
 import jetbrains.buildServer.serverSide.ServerPaths;
@@ -32,9 +33,11 @@ public class TermsOfServiceConfig {
         mySettingsFile = new File(myConfigDir, CONFIG_FILE);
 
         int watchInterval = TeamCityProperties.getInteger("teamcity.termsOfService.configWatchInterval", 10000);
-        FileWatcher filesWatcher = fileWatcherFactory.createSingleFilesWatcher(myConfigDir, watchInterval);
+        FilesWatcher filesWatcher = fileWatcherFactory.createManyFilesWatcher(
+                () -> FileUtil.listFiles(myConfigDir, (dir, name) -> true),
+                watchInterval);
 
-        filesWatcher.registerListener(requestor -> loadSettings());
+        filesWatcher.registerListener((newFiles, modified, removed) -> loadSettings());
         myEvents.addListener(new BuildServerAdapter() {
             @Override
             public void serverStartup() {
