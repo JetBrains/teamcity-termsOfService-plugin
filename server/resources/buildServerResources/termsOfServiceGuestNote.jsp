@@ -11,7 +11,7 @@
 
     <bs:dialog dialogId="agreementDialog" closeCommand="BS.TermsOfServicesGuestNoteDialog.close();" title="${guestNotice.text}" dialogClass="modalDialog agreementDialog">
         <div style="max-height: 35em; overflow: scroll;" >
-            <bs:out value="${guestNotice.html}"/>
+            ${guestNotice.html}
         </div>
 
         <div class="popupSaveButtonsBlock">
@@ -43,10 +43,4 @@
     });
 </script>
 
-
-<style type="text/css">
-    .agreementDialog {
-        width: auto;
-    }
-</style>
 
