@@ -11,7 +11,7 @@
 
     <bs:dialog dialogId="agreementDialog" closeCommand="BS.TermsOfServicesGuestNoteDialog.close();" title="${guestNotice.text}" dialogClass="modalDialog agreementDialog">
         <div style="max-height: 35em; overflow: scroll;" >
-            <bs:iframe url="${guestNotice.link}"/>
+            <bs:out value="${guestNotice.html}"/>
         </div>
 
         <div class="popupSaveButtonsBlock">

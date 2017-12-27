@@ -34,7 +34,7 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
 
     private final List<Agreement> myAgreements = new ArrayList<>();
     private final List<ExternalAgreementLink> externalAgreements = new ArrayList<>();
-    private volatile GuestNoticeSettings myGuestNotice = null;
+    private volatile GuestNotice myGuestNotice = null;
 
     public TermsOfServiceManagerImpl(@NotNull TermsOfServiceConfig config,
                                      @NotNull UserModel userModel,
@@ -52,7 +52,7 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
         for (Object agreementEl : config.getChildren("agreement")) {
             Element paramsElement = ((Element) agreementEl).getChild("parameters");
             Map<String, String> params = paramsElement == null ? emptyMap() : XmlUtil.readParameters(paramsElement);
-            if (params.get("agreement-file") != null) {
+            if (params.get("content-file") != null) {
                 List<TermsOfServiceManager.Consent> consents = new ArrayList<>();
                 Element consentsEl = ((Element) agreementEl).getChild("consents");
                 if (consentsEl != null) {
@@ -66,8 +66,14 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
                         }
                     }
                 }
-                AgreementImpl agreement = new AgreementImpl(((Element) agreementEl).getAttributeValue("id"), params, consents);
-                myAgreements.add(agreement);
+
+                String agreementFileParam = params.get("content-file");
+                File agreementFile = myConfig.getConfigFile(agreementFileParam);
+                try {
+                    myAgreements.add(new AgreementImpl(((Element) agreementEl).getAttributeValue("id"), FileUtil.readText(agreementFile, "UTF-8"), params, consents));
+                } catch (IOException e) {
+                    TermsOfServiceLogger.LOGGER.warnAndDebugDetails("Error while reading Terms Of Service agreement file from " + agreementFile, e);
+                }
             }
         }
 
@@ -75,16 +81,20 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
             externalAgreements.add(new ExternalAgreementLinkSettings(((Element) agreementEl).getAttributeValue("text"), ((Element) agreementEl).getAttributeValue("url")));
         }
 
-        GuestNoticeSettings guestNoticeSettings = null;
         Element guestNoticeEl = config.getChild("guest-notice");
         if (guestNoticeEl != null) {
             Element paramsElement = guestNoticeEl.getChild("parameters");
             Map<String, String> params = paramsElement == null ? emptyMap() : XmlUtil.readParameters(paramsElement);
-            if (params.get("agreement") != null && params.get("text") != null) {
-                guestNoticeSettings = new GuestNoticeSettings(params.get("text"), params.get("agreement"));
+            if (params.get("content-file") != null && params.get("text") != null) {
+                File guestNoticeFile = myConfig.getConfigFile(params.get("content-file"));
+                try {
+                    myGuestNotice = new GuestNoticeSettings(params.get("text"), FileUtil.readText(guestNoticeFile, "UTF-8"));
+                } catch (IOException e) {
+                    TermsOfServiceLogger.LOGGER.warnAndDebugDetails("Error while reading Guest Notice file from " + guestNoticeFile, e);
+                }
+
             }
         }
-        myGuestNotice = guestNoticeSettings;
     }
 
     @NotNull
@@ -124,31 +134,19 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
             return Optional.empty();
         }
 
-        Optional<Agreement> agreement = findAgreement(myGuestNotice.getAgreementId());
-
-        return agreement.map(a -> new GuestNotice() {
-            @NotNull
-            @Override
-            public String getText() {
-                return myGuestNotice.getText();
-            }
-
-            @NotNull
-            @Override
-            public String getLink() {
-                return a.getLink();
-            }
-        });
+        return Optional.of(myGuestNotice);
     }
 
     private final class AgreementImpl implements Agreement {
 
-        private final String id;
+        @NotNull private final String id;
+        @NotNull private final String html;
         private final Map<String, String> params;
         private final List<Consent> consents;
 
-        AgreementImpl(@NotNull String id, @NotNull Map<String, String> params, @NotNull List<Consent> consents) {
+        AgreementImpl(@NotNull String id, @NotNull String html, @NotNull Map<String, String> params, @NotNull List<Consent> consents) {
             this.id = id;
+            this.html = html;
             this.params = params;
             this.consents = consents;
         }
@@ -171,20 +169,11 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
             return StringUtil.notNullize(params.get("full-name"), "Terms of Service");
         }
 
-        @Nullable
+        @NotNull
         @Override
-        public String getText() {
-            String agreementFileParam = params.get("agreement-file");
-            if (agreementFileParam == null) {
-                return null;
-            }
-            File agreementFile = myConfig.getConfigFile(agreementFileParam);
-            try {
-                return FileUtil.readText(agreementFile, "UTF-8");
-            } catch (IOException e) {
-                TermsOfServiceLogger.LOGGER.warnAndDebugDetails("Error while reading Terms Of Service agreement file from " + agreementFile, e);
-                throw new IllegalStateException("Error while reading Terms Of Service agreement file from " + agreementFile, e);
-            }
+        public String getHtml() {
+            return html;
+
         }
 
         @NotNull
@@ -255,21 +244,24 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
         }
     }
 
-    class GuestNoticeSettings {
+    class GuestNoticeSettings implements GuestNotice {
         private final String text;
-        private final String agreementId;
+        private final String htmlContent;
 
-        GuestNoticeSettings(String text, String agreementId) {
+        GuestNoticeSettings(@NotNull String text, @NotNull String htmlContent) {
             this.text = text;
-            this.agreementId = agreementId;
+            this.htmlContent = htmlContent;
         }
 
+        @NotNull
         public String getText() {
             return text;
         }
 
-        public String getAgreementId() {
-            return agreementId;
+        @NotNull
+        @Override
+        public String getHtml() {
+            return htmlContent;
         }
     }
 

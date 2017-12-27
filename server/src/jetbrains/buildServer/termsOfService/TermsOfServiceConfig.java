@@ -32,7 +32,7 @@ public class TermsOfServiceConfig {
         mySettingsFile = new File(myConfigDir, CONFIG_FILE);
 
         int watchInterval = TeamCityProperties.getInteger("teamcity.termsOfService.configWatchInterval", 10000);
-        FileWatcher filesWatcher = fileWatcherFactory.createSingleFilesWatcher(mySettingsFile, watchInterval);
+        FileWatcher filesWatcher = fileWatcherFactory.createSingleFilesWatcher(myConfigDir, watchInterval);
 
         filesWatcher.registerListener(requestor -> loadSettings());
         myEvents.addListener(new BuildServerAdapter() {

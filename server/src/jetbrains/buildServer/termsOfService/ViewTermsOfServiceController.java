@@ -53,12 +53,7 @@ public class ViewTermsOfServiceController extends BaseController {
         }
 
         ModelAndView view = new ModelAndView(myResourcesPath + TERMS_OF_SERVICE_JSP);
-        String agreementText = agreement.get().getText();
-        if (agreementText == null) {
-            return new ModelAndView(new RedirectView(agreement.get().getLink()));
-        }
-
-        view.addObject("agreementText", agreement.get().getText());
+        view.addObject("agreementText", agreement.get().getHtml());
         view.addObject("termsOfServiceName", agreement.get().getFullName());
         return view;
     }

@@ -36,8 +36,8 @@ public interface TermsOfServiceManager {
         @NotNull
         String getFullName();
 
-        @Nullable
-        String getText();
+        @NotNull
+        String getHtml();
 
         @NotNull
         String getLink();
@@ -57,7 +57,7 @@ public interface TermsOfServiceManager {
         String getText();
 
         @NotNull
-        String getLink();
+        String getHtml();
     }
 
     interface Consent {

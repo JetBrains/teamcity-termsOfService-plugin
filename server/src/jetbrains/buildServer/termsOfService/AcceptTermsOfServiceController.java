@@ -4,7 +4,6 @@ import jetbrains.buildServer.controllers.BaseController;
 import jetbrains.buildServer.controllers.login.RememberUrl;
 import jetbrains.buildServer.controllers.overview.OverviewController;
 import jetbrains.buildServer.users.SUser;
-import jetbrains.buildServer.util.StringUtil;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import jetbrains.buildServer.web.util.SessionUser;
@@ -70,11 +69,7 @@ public class AcceptTermsOfServiceController extends BaseController {
 
     private ModelAndView show(@NotNull SUser user, @NotNull TermsOfServiceManager.Agreement agreement) {
         ModelAndView view = new ModelAndView(agreement.isAccepted(user) ? myResourcesPath + TERMS_OF_SERVICE_JSP : myResourcesPath + ACCEPT_TERMS_OF_SERVICE_JSP);
-        String agreementText = agreement.getText();
-        if (agreementText == null) {
-            return new ModelAndView(new RedirectView(agreement.getLink()));
-        }
-        view.addObject("agreementText", agreement.getText());
+        view.addObject("agreementText", agreement.getHtml());
         view.addObject("termsOfServiceName", agreement.getFullName());
         view.addObject("consents", agreement.getConsents());
         return view;

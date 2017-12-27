@@ -72,7 +72,7 @@ public class TermsOfServiceTest extends BaseWebTestCase {
         writeConfig("<terms-of-service-config>\n" +
                 "    <agreement id=\"hosted_teamcity\">\n" +
                 "        <parameters>\n" +
-                "          \t<param name=\"agreement-file\" value=\"agreement.html\"/>\n" +
+                "          \t<param name=\"content-file\" value=\"agreement.html\"/>\n" +
                 "          \t<param name=\"version\" value=\"2017.1\"/>\n" +
                 "            <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
                 "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
@@ -114,7 +114,7 @@ public class TermsOfServiceTest extends BaseWebTestCase {
         writeConfig("<terms-of-service-config>\n" +
                 "    <agreement id=\"hosted_teamcity\">\n" +
                 "        <parameters>\n" +
-                "          \t<param name=\"agreement-file\" value=\"agreement.html\"/>\n" +
+                "          \t<param name=\"content-file\" value=\"agreement.html\"/>\n" +
                 "          \t<param name=\"version\" value=\"2017.1\"/>\n" +
                 "            <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
                 "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
@@ -134,7 +134,7 @@ public class TermsOfServiceTest extends BaseWebTestCase {
         writeConfig("<terms-of-service-config>\n" +
                 "    <agreement id=\"hosted_teamcity\">\n" +
                 "        <parameters>\n" +
-                "          \t<param name=\"agreement-file\" value=\"agreement.html\"/>\n" +
+                "          \t<param name=\"content-file\" value=\"agreement.html\"/>\n" +
                 "          \t<param name=\"version\" value=\"2017.2\"/>\n" +
                 "            <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
                 "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
@@ -158,7 +158,7 @@ public class TermsOfServiceTest extends BaseWebTestCase {
         writeConfig("<terms-of-service-config>\n" +
                 "    <agreement id=\"hosted_teamcity\">\n" +
                 "        <parameters>\n" +
-                "          \t<param name=\"agreement-file\" value=\"agreement.html\"/>\n" +
+                "          \t<param name=\"content-file\" value=\"agreement.html\"/>\n" +
                 "          \t<param name=\"version\" value=\"2017.1\"/>\n" +
                 "            <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
                 "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
@@ -202,7 +202,7 @@ public class TermsOfServiceTest extends BaseWebTestCase {
         writeConfig("<terms-of-service-config>\n" +
                         "    <agreement id=\"hosted_teamcity\">\n" +
                         "        <parameters>\n" +
-                        "          \t<param name=\"agreement-file\" value=\"agreement.html\"/>\n" +
+                        "          \t<param name=\"content-file\" value=\"agreement.html\"/>\n" +
                         "            <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
                         "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
                         "        </parameters>\n" +
@@ -240,17 +240,21 @@ public class TermsOfServiceTest extends BaseWebTestCase {
 
     @Test
     public void should_support_guest_user_notice() throws Exception {
+        File guestNoticeFile = new File(myAgreementFile.getParent(), "guestNotice.html");
+        FileUtil.createIfDoesntExist(guestNoticeFile);
+        FileUtil.writeFile(guestNoticeFile, "Guest Notice");
+
         writeConfig("<terms-of-service-config>\n" +
                 "    <agreement id=\"privacy_policy\">\n" +
                 "        <parameters>\n" +
-                "          \t<param name=\"agreement-file\" value=\"agreement.html\"/>\n" +
+                "          \t<param name=\"content-file\" value=\"agreement.html\"/>\n" +
                 "            <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
                 "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
                 "        </parameters>\n" +
                 "    </agreement>\n" +
                 "    <guest-notice>\n" +
                 "        <parameters>\n" +
-                "           \t<param name=\"agreement\" value=\"privacy_policy\"/>\n" +
+                "           \t<param name=\"content-file\" value=\"guestNotice.html\"/>\n" +
                 "            <param name=\"text\" value=\"A privacy reminder from JetBrains\"/>\n" +
                 "        </parameters>\n" +
                 "    </guest-notice>\n" +
@@ -265,8 +269,9 @@ public class TermsOfServiceTest extends BaseWebTestCase {
                 .extracting("link")
                 .containsOnly("/viewTermsOfServices.html?agreement=privacy_policy");
 
-        then(((TermsOfServiceManager.GuestNotice) guestNoteExtension().get("guestNotice")).getText())
-                .isEqualTo("A privacy reminder from JetBrains");
+        TermsOfServiceManager.GuestNotice guestNotice = (TermsOfServiceManager.GuestNotice) guestNoteExtension().get("guestNotice");
+        then(guestNotice.getText()).isEqualTo("A privacy reminder from JetBrains");
+        then(guestNotice.getHtml()).isEqualTo("Guest Notice");
     }
 
     private void writeConfig(String s) {
