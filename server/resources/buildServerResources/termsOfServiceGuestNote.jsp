@@ -1,11 +1,13 @@
 <%@include file="/include-internal.jsp" %>
 <%--@elvariable id="guestNotice" type="jetbrains.buildServer.termsOfService.TermsOfServiceManager.GuestNotice"--%>
 <c:if test="${guestNotice != null}">
-    <div id="agreementNote" style="position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; z-index: 4; opacity: 0.9; background-color: #ffa; border: 1px solid #8a8d7f; display: none;">
-        <div style="padding: .5em 0;">
-            <c:out value="${guestNotice.text}" />
-            <input class="btn btn_primary submitButton" style="margin-left: 1.5em;" type="button" value="Review now" onclick="BS.TermsOfServicesGuestNoteDialog.showCentered(); return false;"/>
-        </div>
+    <bs:linkCSS>
+        ${teamcityPluginResourcesPath}/termsOfService.css
+    </bs:linkCSS>
+
+    <div id="guestNotice" style="display: none;">
+        <c:out value="${guestNotice.text}" />
+        <input class="btn btn_primary submitButton" style="margin-left: 1.5em;" type="button" value="Review now" onclick="BS.TermsOfServicesGuestNoteDialog.showCentered(); return false;"/>
     </div>
 
 
@@ -19,28 +21,30 @@
             <forms:cancel onclick="BS.TermsOfServicesGuestNoteDialog.close();"/>
         </div>
     </bs:dialog>
+
+
+    <script type="text/javascript">
+        BS.TermsOfServicesGuestNoteDialog = OO.extend(BS.AbstractModalDialog, {
+
+            getContainer: function () {
+                return $('agreementDialog');
+            },
+
+            accept: function () {
+                BS.Cookie.set("termsOfServiceAccepted", "true", 30);
+                BS.Util.hide("guestNotice");
+                this.close();
+            }
+        });
+
+        $j(document).ready(function() {
+            if (!BS.Cookie.get("termsOfServiceAccepted")) {
+                BS.Util.show("guestNotice");
+            }
+        });
+    </script>
 </c:if>
 
 
-<script type="text/javascript">
-    BS.TermsOfServicesGuestNoteDialog = OO.extend(BS.AbstractModalDialog, {
-
-        getContainer: function () {
-            return $('agreementDialog');
-        },
-
-        accept: function () {
-            BS.Cookie.set("termsOfServiceAccepted", "true", 30);
-            BS.Util.hide("agreementNote");
-            this.close();
-        }
-    });
-
-    $j(document).ready(function() {
-        if (!BS.Cookie.get("termsOfServiceAccepted")) {
-            BS.Util.show("agreementNote");
-        }
-    });
-</script>
 
 

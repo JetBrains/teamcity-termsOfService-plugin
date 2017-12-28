@@ -14,19 +14,28 @@
     margin-right: 0;
 }
 
-.roleName, .projectName {
-    font-style: italic;
-}
-
 .licenseAgreementLink {
     display: block;
 }
 
-#pageContent .agreement p+h1 {
+#pageContent .agreement p + h1 {
     padding-top: 0.6em;
     font-size: 200%;
 }
 
-#pageContent .agreement p+h1:first-of-type {
+#pageContent .agreement p + h1:first-of-type {
     padding-top: 0;
+}
+
+#guestNotice {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    z-index: 4;
+    opacity: 0.9;
+    background-color: #ffa;
+    border: 1px solid #8a8d7f;
+    padding: 1em;
 }
