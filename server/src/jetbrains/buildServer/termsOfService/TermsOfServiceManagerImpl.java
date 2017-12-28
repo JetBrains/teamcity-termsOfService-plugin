@@ -60,7 +60,7 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
                         Element consentEl = ((Element) consent);
                         String id = consentEl.getAttributeValue("id");
                         String text = consentEl.getAttributeValue("text");
-                        boolean checked = Boolean.parseBoolean(consentEl.getAttributeValue("checked"));
+                        boolean checked = Boolean.parseBoolean(consentEl.getAttributeValue("default"));
                         if (isNotEmpty(id) && isNotEmpty(text)) {
                             consents.add(new ConsentSettings(id, text, checked));
                         }
@@ -77,7 +77,7 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
             }
         }
 
-        for (Object agreementEl : config.getChildren("externalAgreementLink")) {
+        for (Object agreementEl : config.getChildren("external-agreement-link")) {
             externalAgreements.add(new ExternalAgreementLinkSettings(((Element) agreementEl).getAttributeValue("text"), ((Element) agreementEl).getAttributeValue("url")));
         }
 

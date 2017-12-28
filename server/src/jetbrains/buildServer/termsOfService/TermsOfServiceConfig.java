@@ -1,6 +1,5 @@
 package jetbrains.buildServer.termsOfService;
 
-import jetbrains.buildServer.configuration.FileWatcher;
 import jetbrains.buildServer.configuration.FilesWatcher;
 import jetbrains.buildServer.serverSide.BuildServerAdapter;
 import jetbrains.buildServer.serverSide.BuildServerListener;
@@ -20,7 +19,7 @@ import java.util.function.Consumer;
 
 @ThreadSafe
 public class TermsOfServiceConfig {
-    private static final String CONFIG_FILE = "terms-of-service-config.xml";
+    private static final String CONFIG_FILE = "settings.xml";
 
     private final File myConfigDir;
     private final File mySettingsFile;

@@ -11,8 +11,6 @@ import jetbrains.buildServer.util.FileUtil;
 import org.apache.log4j.Level;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.RedirectView;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -58,7 +56,7 @@ public class TermsOfServiceTest extends BaseWebTestCase {
         TermsOfServiceLogger.LOGGER = new ConsoleLogger("TOS ", Level.DEBUG);
         setInternalProperty(TEAMCITY_TERMS_OF_SERVICE_ENABLED_PROPERTY, "true");
         File termsOfServiceDir = new File(myFixture.getServerPaths().getConfigDir(), "termsOfService");
-        configFile = new File(termsOfServiceDir, "terms-of-service-config.xml");
+        configFile = new File(termsOfServiceDir, "settings.xml");
         myAgreementFile = new File(termsOfServiceDir, "agreement.html");
         FileUtil.createIfDoesntExist(myAgreementFile);
         FileUtil.writeFile(myAgreementFile, "Agreement");
@@ -69,7 +67,7 @@ public class TermsOfServiceTest extends BaseWebTestCase {
 
     @Test
     public void test_terms_of_service_flow_for_single_agreement() throws Exception {
-        writeConfig("<terms-of-service-config>\n" +
+        writeConfig("<terms-of-service>\n" +
                 "    <agreement id=\"hosted_teamcity\">\n" +
                 "        <parameters>\n" +
                 "          \t<param name=\"content-file\" value=\"agreement.html\"/>\n" +
@@ -78,7 +76,7 @@ public class TermsOfServiceTest extends BaseWebTestCase {
                 "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
                 "        </parameters>\n" +
                 "    </agreement>\n" +
-                "</terms-of-service-config>");
+                "</terms-of-service>");
 
         SUser user = createUser("user1");
         makeLoggedIn(user);
@@ -111,7 +109,7 @@ public class TermsOfServiceTest extends BaseWebTestCase {
 
     @Test
     public void should_support_version_changes() throws Exception {
-        writeConfig("<terms-of-service-config>\n" +
+        writeConfig("<terms-of-service>\n" +
                 "    <agreement id=\"hosted_teamcity\">\n" +
                 "        <parameters>\n" +
                 "          \t<param name=\"content-file\" value=\"agreement.html\"/>\n" +
@@ -120,7 +118,7 @@ public class TermsOfServiceTest extends BaseWebTestCase {
                 "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
                 "        </parameters>\n" +
                 "    </agreement>\n" +
-                "</terms-of-service-config>");
+                "</terms-of-service>");
 
         SUser user = createUser("user1");
         makeLoggedIn(user);
@@ -131,7 +129,7 @@ public class TermsOfServiceTest extends BaseWebTestCase {
         then(interceptor.preHandle(myRequest, myResponse)).isTrue();
 
 
-        writeConfig("<terms-of-service-config>\n" +
+        writeConfig("<terms-of-service>\n" +
                 "    <agreement id=\"hosted_teamcity\">\n" +
                 "        <parameters>\n" +
                 "          \t<param name=\"content-file\" value=\"agreement.html\"/>\n" +
@@ -140,7 +138,7 @@ public class TermsOfServiceTest extends BaseWebTestCase {
                 "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
                 "        </parameters>\n" +
                 "    </agreement>\n" +
-                "</terms-of-service-config>");
+                "</terms-of-service>");
         myRequest.addParameters("agreement", "hosted_teamcity");
         myRequest.setMethod("GET");
 
@@ -155,7 +153,7 @@ public class TermsOfServiceTest extends BaseWebTestCase {
 
     @Test
     public void should_support_configurable_list_of_consents() throws Exception {
-        writeConfig("<terms-of-service-config>\n" +
+        writeConfig("<terms-of-service>\n" +
                 "    <agreement id=\"hosted_teamcity\">\n" +
                 "        <parameters>\n" +
                 "          \t<param name=\"content-file\" value=\"agreement.html\"/>\n" +
@@ -164,11 +162,11 @@ public class TermsOfServiceTest extends BaseWebTestCase {
                 "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
                 "        </parameters>\n" +
                 "        <consents>\n" +
-                "          \t<consent id=\"analytics\" text=\"Allow analytics\" checked=\"true\"/>\n" +
-                "          \t<consent id=\"marketing\" text=\"Allow marketing\" checked=\"false\"/>\n" +
+                "          \t<consent id=\"analytics\" text=\"Allow analytics\" default=\"true\"/>\n" +
+                "          \t<consent id=\"marketing\" text=\"Allow marketing\" default=\"false\"/>\n" +
                 "        </consents>\n" +
                 "    </agreement>\n" +
-                "</terms-of-service-config>");
+                "</terms-of-service>");
 
         SUser user = createUser("user1");
         makeLoggedIn(user);
@@ -199,7 +197,7 @@ public class TermsOfServiceTest extends BaseWebTestCase {
 
     @Test
     public void should_support_several_agreements_one_of_which_user_must_accept() throws Exception {
-        writeConfig("<terms-of-service-config>\n" +
+        writeConfig("<terms-of-service>\n" +
                         "    <agreement id=\"hosted_teamcity\">\n" +
                         "        <parameters>\n" +
                         "          \t<param name=\"content-file\" value=\"agreement.html\"/>\n" +
@@ -207,8 +205,8 @@ public class TermsOfServiceTest extends BaseWebTestCase {
                         "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
                         "        </parameters>\n" +
                         "    </agreement>\n" +
-                        "    <externalAgreementLink name=\"Terms of Service\" url=\"https://www.jetbrains.com/company/privacy.html\"/>\n" +
-                    "</terms-of-service-config>");
+                        "    <external-agreement-link name=\"Terms of Service\" url=\"https://www.jetbrains.com/company/privacy.html\"/>\n" +
+                    "</terms-of-service>");
 
         makeLoggedIn(createUser("user"));
 
@@ -244,7 +242,7 @@ public class TermsOfServiceTest extends BaseWebTestCase {
         FileUtil.createIfDoesntExist(guestNoticeFile);
         FileUtil.writeFile(guestNoticeFile, "Guest Notice");
 
-        writeConfig("<terms-of-service-config>\n" +
+        writeConfig("<terms-of-service>\n" +
                 "    <agreement id=\"privacy_policy\">\n" +
                 "        <parameters>\n" +
                 "          \t<param name=\"content-file\" value=\"agreement.html\"/>\n" +
@@ -258,7 +256,7 @@ public class TermsOfServiceTest extends BaseWebTestCase {
                 "            <param name=\"text\" value=\"A privacy reminder from JetBrains\"/>\n" +
                 "        </parameters>\n" +
                 "    </guest-notice>\n" +
-                "</terms-of-service-config>");
+                "</terms-of-service>");
 
 
         makeLoggedIn(getUserModelEx().getGuestUser());
