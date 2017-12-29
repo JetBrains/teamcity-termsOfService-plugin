@@ -39,7 +39,7 @@
                     <outputFile>${basedir}/target/teamcity-plugin.xml</outputFile>
                     <replacements>
                         <replacement>
-                            <token>@Version@</token>
+                            <token>@Plugin_Version@</token>
                             <value>${teamcity.termsOfService.plugin.version}</value>
                         </replacement>
                     </replacements>
