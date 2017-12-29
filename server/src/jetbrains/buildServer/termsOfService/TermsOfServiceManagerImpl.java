@@ -100,7 +100,7 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
     @NotNull
     @Override
     public List<Agreement> getMustAcceptAgreements(@NotNull SUser user) {
-        if (!TeamCityProperties.getBoolean(TEAMCITY_TERMS_OF_SERVICE_ENABLED_PROPERTY)) {
+        if (!TeamCityProperties.getBooleanOrTrue(TEAMCITY_TERMS_OF_SERVICE_ENABLED_PROPERTY)) {
             return Collections.emptyList();
         }
         if (userModel.isGuestUser(user)) {
