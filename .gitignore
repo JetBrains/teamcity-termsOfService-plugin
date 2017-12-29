@@ -1,2 +1,6 @@
-.idea/workspace.xml
-out
+TeamCityDistr
+/target/
+/build/target/
+/server/target/
+**/.DS_Store
+
