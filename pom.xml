@@ -53,7 +53,7 @@
         </pluginManagement>
     </build>
     <modules>
-        <module>server</module>
-        <module>build</module>
+        <module>termsOfService-server</module>
+        <module>termsOfService-build</module>
     </modules>
 </project>

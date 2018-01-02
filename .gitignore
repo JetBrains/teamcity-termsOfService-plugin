@@ -1,9 +1,9 @@
 TeamCityDistr
 /target/
-/build/target/
-/server/target/
+/termsOfService-build/target/
+/termsOfService-server/target/
 .idea/
 .DS_Store
-build/termsOfService-build.iml
-server/termsOfService-server.iml
+termsOfService-build/termsOfService-build.iml
+termsOfService-server/termsOfService-server.iml
 termsOfService.iml
