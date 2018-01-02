@@ -49,7 +49,7 @@ public class ViewTermsOfServiceController extends BaseController {
         if (!agreement.isPresent()) {
             LOGGER.warn("Request for unknown agreement '" + agreementId + "'  detected: " + WebUtil.getRequestDump(request));
             response.setStatus(404);
-            return redirectTo("/", response);
+            return null;
         }
 
         ModelAndView view = new ModelAndView(myResourcesPath + TERMS_OF_SERVICE_JSP);

@@ -56,6 +56,11 @@ public class TermsOfServiceConfig {
         return new File(myConfigDir, filename);
     }
 
+    @NotNull
+    public File getMainConfig() {
+        return getConfigFile(CONFIG_FILE);
+    }
+
     synchronized void loadSettings() {
         try {
             if (mySettingsFile.exists()) {

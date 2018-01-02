@@ -75,6 +75,7 @@ public class TermsOfServiceTest extends BaseTestCase {
     @BeforeMethod
     public void setUp() throws Exception {
         super.setUp();
+        session = new MockHttpSession();
         setInternalProperty("teamcity.http.auth.treat.all.clients.as.browsers","true" );
         securityContext = new SecurityContextImpl();
         EventDispatcher<BuildServerListener> events = ServerSideEventDispatcher.create(securityContext, BuildServerListener.class);
@@ -109,6 +110,33 @@ public class TermsOfServiceTest extends BaseTestCase {
         acceptAgreementController = new AcceptTermsOfServiceController(webControllerManager, pluginDescriptor, termsOfServiceManager);
         viewAgreementController = new ViewTermsOfServiceController(webControllerManager, pluginDescriptor, termsOfServiceManager);
         events.getMulticaster().serverStartup();
+    }
+
+    @Test
+    public void missing_settings_file() throws Exception {
+        assertFalse(configFile.exists());
+
+        login(createUser("user1"));
+
+        assertAgreementNotShown("hosted_teamcity");
+    }
+
+    @Test
+    public void missing_agreement_file() throws Exception {
+        writeConfig("<terms-of-service>\n" +
+                "    <agreement id=\"hosted_teamcity\">\n" +
+                "        <parameters>\n" +
+                "          \t<param name=\"content-file\" value=\"not_extisting.html\"/>\n" +
+                "          \t<param name=\"version\" value=\"2017.1\"/>\n" +
+                "            <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
+                "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
+                "        </parameters>\n" +
+                "    </agreement>\n" +
+                "</terms-of-service>");
+
+        login(createUser("user1"));
+
+        assertAgreementNotShown("hosted_teamcity");
     }
 
     @Test
@@ -249,7 +277,7 @@ public class TermsOfServiceTest extends BaseTestCase {
                         "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
                         "        </parameters>\n" +
                         "    </agreement>\n" +
-                        "    <external-agreement-link name=\"Terms of Service\" url=\"https://www.jetbrains.com/company/privacy.html\"/>\n" +
+                        "    <external-agreement-link text=\"Terms of Service\" url=\"https://www.jetbrains.com/company/privacy.html\"/>\n" +
                     "</terms-of-service>");
 
         login(createUser("user"));
@@ -359,7 +387,6 @@ public class TermsOfServiceTest extends BaseTestCase {
     }
 
     private void newRequest(HttpMethod method, String url) {
-        if (session == null) session = new MockHttpSession();
         request = MockMvcRequestBuilders.request(method, url).session(session).buildRequest(new MockServletContext());
         response = new MockHttpServletResponse();
         ActionMessages messages = ActionMessages.getMessages(request);
@@ -372,6 +399,21 @@ public class TermsOfServiceTest extends BaseTestCase {
 
     private void login(SUser user) {
         securityContext.setAuthorityHolder(user);
+    }
+
+    private void assertAgreementNotShown(@NotNull String agreementId) throws Exception {
+        newRequest(GET, "/overview.html");
+        then(interceptor.preHandle(request, response)).isTrue();
+
+        newRequest(GET, "/acceptTermsOfServices.html?agreement=" + agreementId);
+        acceptAgreementController.doHandle(request, response);
+        then(response.getStatus()).isEqualTo(404);
+
+        newRequest(GET, "/viewTermsOfServices.html?agreement=" + agreementId);
+        viewAgreementController.doHandle(request, response);
+        then(response.getStatus()).isEqualTo(404);
+
+        then((List<TermsOfServiceManager.Agreement>) linksExtension().get("agreements")).isEmpty();
     }
 
 }

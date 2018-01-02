@@ -23,7 +23,7 @@ import static java.util.stream.Collectors.toList;
 
 @ThreadSafe
 public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
-    static final String TEAMCITY_TERMS_OF_SERVICE_ENABLED_PROPERTY = "teamcity.termsOfService.enabled";
+    private static final String TEAMCITY_TERMS_OF_SERVICE_ENABLED_PROPERTY = "teamcity.termsOfService.enabled";
 
     @NotNull
     private final TermsOfServiceConfig myConfig;
@@ -45,61 +45,135 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
         config.setOnChange(this::reloadConfig);
     }
 
-    private void reloadConfig(@NotNull Element config) {
-        myAgreements.clear();
-        externalAgreements.clear();
+    private synchronized void reloadConfig(@NotNull Element config) {
+        TermsOfServiceLogger.LOGGER.info("Loading Terms Of Service configuration from " + myConfig.getMainConfig());
+        readAgreements(config);
+        readExternalAgreement(config);
+        readGuestNotice(config);
+    }
 
-        for (Object agreementEl : config.getChildren("agreement")) {
+    private void readAgreements(@NotNull Element config) {
+        myAgreements.clear();
+        List agreementElements = config.getChildren("agreement");
+        if (agreementElements.isEmpty()) {
+            TermsOfServiceLogger.LOGGER.warn("Broken Terms Of Service configuration: no 'agreement' elements found in " + myConfig.getMainConfig());
+        }
+
+        for (Object agreementEl : agreementElements) {
             Element paramsElement = ((Element) agreementEl).getChild("parameters");
             Map<String, String> params = paramsElement == null ? emptyMap() : XmlUtil.readParameters(paramsElement);
-            if (params.get("content-file") != null) {
-                List<TermsOfServiceManager.Consent> consents = new ArrayList<>();
-                Element consentsEl = ((Element) agreementEl).getChild("consents");
-                if (consentsEl != null) {
-                    for (Object consent : consentsEl.getChildren("consent")) {
-                        Element consentEl = ((Element) consent);
-                        String id = consentEl.getAttributeValue("id");
-                        String text = consentEl.getAttributeValue("text");
-                        boolean checked = Boolean.parseBoolean(consentEl.getAttributeValue("default"));
-                        if (isNotEmpty(id) && isNotEmpty(text)) {
-                            consents.add(new ConsentSettings(id, text, checked));
-                        }
-                    }
-                }
+            String agreementId = ((Element) agreementEl).getAttributeValue("id");
+            String agreementFileParam = params.get("content-file");
 
-                String agreementFileParam = params.get("content-file");
-                File agreementFile = myConfig.getConfigFile(agreementFileParam);
+            if (StringUtil.isEmptyOrSpaces(agreementId)) {
+                TermsOfServiceLogger.LOGGER.warn("Broken Terms Of Service configuration: missing agreement id, the agreement is ignored.");
+                continue;
+            }
+
+            if (StringUtil.isEmptyOrSpaces(agreementFileParam)) {
+                TermsOfServiceLogger.LOGGER.warn("Broken Terms Of Service configuration: missing 'content-file' parameter for agreement id = " + agreementId + ", the agreement is ignored.");
+                continue;
+            }
+
+            File agreementFile = myConfig.getConfigFile(agreementFileParam);
+            String agreementContent;
+
+            if (agreementFile.exists() && agreementFile.isFile()) {
                 try {
-                    myAgreements.add(new AgreementImpl(((Element) agreementEl).getAttributeValue("id"), FileUtil.readText(agreementFile, "UTF-8"), params, consents));
+                    agreementContent = FileUtil.readText(agreementFile, "UTF-8");
                 } catch (IOException e) {
-                    TermsOfServiceLogger.LOGGER.warnAndDebugDetails("Error while reading Terms Of Service agreement file from " + agreementFile, e);
+                    TermsOfServiceLogger.LOGGER.warnAndDebugDetails("Error while reading Terms Of Service agreement file from " + agreementFile + " for agreement id = " + agreementId, e);
+                    continue;
+                }
+            } else {
+                TermsOfServiceLogger.LOGGER.warn("Broken Terms Of Service configuration: agreement file '" + agreementFile + "' doesn't exist for agreement id = " + agreementId);
+                continue;
+            }
+
+
+            List<Consent> consents = new ArrayList<>();
+            Element consentsEl = ((Element) agreementEl).getChild("consents");
+            if (consentsEl != null) {
+                for (Object consent : consentsEl.getChildren("consent")) {
+                    Element consentEl = ((Element) consent);
+                    String id = consentEl.getAttributeValue("id");
+                    String text = consentEl.getAttributeValue("text");
+
+                    if (StringUtil.isEmptyOrSpaces(id)) {
+                        TermsOfServiceLogger.LOGGER.warn("Broken Terms Of Service configuration: missing consent id, the consent is ignored.");
+                        continue;
+                    }
+
+                    if (StringUtil.isEmptyOrSpaces(text)) {
+                        TermsOfServiceLogger.LOGGER.warn("Broken Terms Of Service configuration: missing consent text, the consent is ignored.");
+                        continue;
+                    }
+
+                    boolean checked = Boolean.parseBoolean(consentEl.getAttributeValue("default"));
+                    consents.add(new ConsentSettings(id, text, checked));
                 }
             }
-        }
 
+            myAgreements.add(new AgreementImpl(agreementId, agreementContent, params, consents));
+        }
+    }
+
+    private void readExternalAgreement(@NotNull Element config) {
+        externalAgreements.clear();
         for (Object agreementEl : config.getChildren("external-agreement-link")) {
-            externalAgreements.add(new ExternalAgreementLinkSettings(((Element) agreementEl).getAttributeValue("text"), ((Element) agreementEl).getAttributeValue("url")));
-        }
+            String text = ((Element) agreementEl).getAttributeValue("text");
+            String url = ((Element) agreementEl).getAttributeValue("url");
 
+            if (StringUtil.isEmptyOrSpaces(text)) {
+                TermsOfServiceLogger.LOGGER.warn("Broken Terms Of Service configuration: missing external agreement text, the agreement is ignored.");
+                continue;
+            }
+
+            if (StringUtil.isEmptyOrSpaces(url)) {
+                TermsOfServiceLogger.LOGGER.warn("Broken Terms Of Service configuration: missing external agreement url, the agreement is ignored.");
+                continue;
+            }
+
+            externalAgreements.add(new ExternalAgreementLinkSettings(text, url));
+        }
+    }
+
+    private void readGuestNotice(@NotNull Element config) {
         Element guestNoticeEl = config.getChild("guest-notice");
         if (guestNoticeEl != null) {
             Element paramsElement = guestNoticeEl.getChild("parameters");
             Map<String, String> params = paramsElement == null ? emptyMap() : XmlUtil.readParameters(paramsElement);
-            if (params.get("content-file") != null && params.get("text") != null) {
-                File guestNoticeFile = myConfig.getConfigFile(params.get("content-file"));
-                try {
-                    myGuestNotice = new GuestNoticeSettings(params.get("text"), FileUtil.readText(guestNoticeFile, "UTF-8"));
-                } catch (IOException e) {
-                    TermsOfServiceLogger.LOGGER.warnAndDebugDetails("Error while reading Guest Notice file from " + guestNoticeFile, e);
-                }
+            String text = params.get("text");
+            String contentFile = params.get("content-file");
 
+            if (StringUtil.isEmptyOrSpaces(text)) {
+                TermsOfServiceLogger.LOGGER.warn("Broken Terms Of Service configuration: missing guest notice text, the guest notice is ignored.");
+                return;
+            }
+
+            if (StringUtil.isEmptyOrSpaces(contentFile)) {
+                TermsOfServiceLogger.LOGGER.warn("Broken Terms Of Service configuration: missing 'content-file' parameter for a guest notice, the guest notice is ignored.");
+                return;
+            }
+
+            File guestNoticeFile = myConfig.getConfigFile(params.get("content-file"));
+
+            if (guestNoticeFile.exists() && guestNoticeFile.isFile()) {
+                try {
+                    String guestNoticeContent = FileUtil.readText(guestNoticeFile, "UTF-8");
+                    myGuestNotice = new GuestNoticeSettings(text, guestNoticeContent);
+                } catch (IOException e) {
+                    TermsOfServiceLogger.LOGGER.warnAndDebugDetails("Error while reading guest notice content from " + guestNoticeFile, e);
+                }
+            } else {
+                TermsOfServiceLogger.LOGGER.warn("Broken Terms Of Service configuration: guest notice content file '" + guestNoticeFile + "' doesn't exist");
             }
         }
     }
 
     @NotNull
     @Override
-    public List<Agreement> getMustAcceptAgreements(@NotNull SUser user) {
+    public synchronized List<Agreement> getMustAcceptAgreements(@NotNull SUser user) {
         if (!TeamCityProperties.getBooleanOrTrue(TEAMCITY_TERMS_OF_SERVICE_ENABLED_PROPERTY)) {
             return Collections.emptyList();
         }
@@ -130,7 +204,7 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
 
     @NotNull
     @Override
-    public Optional<GuestNotice> getGuestNotice() {
+    public synchronized Optional<GuestNotice> getGuestNotice() {
         if (myGuestNotice == null) {
             return Optional.empty();
         }
@@ -140,8 +214,10 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
 
     private final class AgreementImpl implements Agreement {
 
-        @NotNull private final String id;
-        @NotNull private final String html;
+        @NotNull
+        private final String id;
+        @NotNull
+        private final String html;
         private final Map<String, String> params;
         private final List<Consent> consents;
 
