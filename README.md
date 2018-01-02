@@ -52,3 +52,13 @@ If in addition you want to display a special notice to the guest user you should
 ```
 * Place the agreement html in `<TeamCity Data Directory>/config/termsOfService/agreement.html` file 
 * Place the guest notice html in `<TeamCity Data Directory>/config/termsOfService/guestNotice.html` file 
+
+
+# Data related to the agreement acceptance
+
+The data related to the agreement acceptance by a user is saved and can be fetched from the user properties:
+
+* _teamcity.policy.<agreement_id>.acceptedDate_ - date when the agreement was accepted
+* _teamcity.policy.<agreement_id>.acceptedFromIP_ - IP address of the request when the user accepts agreement
+* _teamcity.policy.<agreement_id>.acceptedVersion_ - version of the agreement that was accepted by the user. 
+When agreement version in the settings file is changed user will be forced to accept it again.
