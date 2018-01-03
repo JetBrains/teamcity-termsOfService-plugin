@@ -14,12 +14,13 @@
     <bs:dialog dialogId="agreementDialog" closeCommand="BS.TermsOfServicesGuestNoteDialog.close();" title="${guestNotice.text}" dialogClass="modalDialog agreementDialog">
         <div style="max-height: 35em; overflow: scroll;" >
             ${guestNotice.html}
+
+            <div class="popupSaveButtonsBlock">
+                <forms:submit label="I agree" onclick="BS.TermsOfServicesGuestNoteDialog.accept();"/>
+                <forms:cancel onclick="BS.TermsOfServicesGuestNoteDialog.close();"/>
+            </div>
         </div>
 
-        <div class="popupSaveButtonsBlock">
-            <forms:submit label="Accept" onclick="BS.TermsOfServicesGuestNoteDialog.accept();"/>
-            <forms:cancel onclick="BS.TermsOfServicesGuestNoteDialog.close();"/>
-        </div>
     </bs:dialog>
 
 
