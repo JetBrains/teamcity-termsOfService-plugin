@@ -53,11 +53,17 @@ public interface TermsOfServiceManager {
     }
 
     interface GuestNotice {
+
         @NotNull
         String getText();
 
         @NotNull
         String getHtml();
+
+        @NotNull
+        String getCookieName();
+
+        int getCookieDurationDays();
     }
 
     interface Consent {

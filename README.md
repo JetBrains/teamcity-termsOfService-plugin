@@ -46,6 +46,8 @@ If in addition you want to display a special notice to the guest user you should
         <parameters>
             <param name="content-file" value="guestNotice.html"/> <!-- Path to the file containing notice html, relative to the <TeamCity Data Directory>/config/termsOfService/ directory  -->
             <param name="text" value="A privacy reminder from JetBrains"/>  <!-- Short text to be shown in the notice-->
+            <param name="accepted-cookie-name" value="guest-notice-accepted"/> <!-- The name of the cookie where the fact of acceptance is saved -->
+            <param name="accepted-cookie-max-age-days" value="30"/> <!-- The cookie's expiration interval. After the specified number of days the user will be asked to confirm the notice again. -->
         </parameters>
     </guest-notice>
 </terms-of-service>

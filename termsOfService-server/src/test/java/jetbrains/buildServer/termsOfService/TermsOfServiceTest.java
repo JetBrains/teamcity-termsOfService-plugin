@@ -326,10 +326,11 @@ public class TermsOfServiceTest extends BaseTestCase {
                 "        <parameters>\n" +
                 "           \t<param name=\"content-file\" value=\"guestNotice.html\"/>\n" +
                 "            <param name=\"text\" value=\"A privacy reminder from JetBrains\"/>\n" +
+                "            <param name=\"accepted-cookie-name\" value=\"privacy_policy_accepted\"/>\n" +
+                "            <param name=\"accepted-cookie-max-age-days\" value=\"10\"/>\n" +
                 "        </parameters>\n" +
                 "    </guest-notice>\n" +
                 "</terms-of-service>");
-
 
         login(userModel.getGuestUser());
 
@@ -343,6 +344,8 @@ public class TermsOfServiceTest extends BaseTestCase {
         TermsOfServiceManager.GuestNotice guestNotice = (TermsOfServiceManager.GuestNotice) guestNoteExtension().get("guestNotice");
         then(guestNotice.getText()).isEqualTo("A privacy reminder from JetBrains");
         then(guestNotice.getHtml()).isEqualTo("Guest Notice");
+        then(guestNotice.getCookieName()).isEqualTo("privacy_policy_accepted");
+        then(guestNotice.getCookieDurationDays()).isEqualTo(10);
     }
 
     private void writeConfig(String s) {

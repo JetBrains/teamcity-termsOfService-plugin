@@ -8,7 +8,6 @@ import jetbrains.buildServer.util.*;
 import jetbrains.buildServer.web.util.WebUtil;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.concurrent.ThreadSafe;
 import javax.servlet.http.HttpServletRequest;
@@ -17,7 +16,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static com.intellij.openapi.util.text.StringUtil.isNotEmpty;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 
@@ -161,7 +159,9 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
             if (guestNoticeFile.exists() && guestNoticeFile.isFile()) {
                 try {
                     String guestNoticeContent = FileUtil.readText(guestNoticeFile, "UTF-8");
-                    myGuestNotice = new GuestNoticeSettings(text, guestNoticeContent);
+                    String cookieName = params.getOrDefault("accepted-cookie-name", "guest-notice-accepted");
+                    int cookieDurationMinutes = StringUtil.parseInt(params.getOrDefault("accepted-cookie-max-age-days", "30"), 30);
+                    myGuestNotice = new GuestNoticeSettings(text, guestNoticeContent, cookieName, cookieDurationMinutes);
                 } catch (IOException e) {
                     TermsOfServiceLogger.LOGGER.warnAndDebugDetails("Error while reading guest notice content from " + guestNoticeFile, e);
                 }
@@ -324,10 +324,14 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
     class GuestNoticeSettings implements GuestNotice {
         private final String text;
         private final String htmlContent;
+        private final String cookieName;
+        private final int cookieDurationDays;
 
-        GuestNoticeSettings(@NotNull String text, @NotNull String htmlContent) {
+        GuestNoticeSettings(@NotNull String text, @NotNull String htmlContent, @NotNull String cookieName, int cookieDurationDays) {
             this.text = text;
             this.htmlContent = htmlContent;
+            this.cookieName = cookieName;
+            this.cookieDurationDays = cookieDurationDays;
         }
 
         @NotNull
@@ -339,6 +343,17 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
         @Override
         public String getHtml() {
             return htmlContent;
+        }
+
+        @NotNull
+        @Override
+        public String getCookieName() {
+            return cookieName;
+        }
+
+        @Override
+        public int getCookieDurationDays() {
+            return cookieDurationDays;
         }
     }
 

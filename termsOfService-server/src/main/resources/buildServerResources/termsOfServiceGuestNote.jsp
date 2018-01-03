@@ -31,14 +31,14 @@
             },
 
             accept: function () {
-                BS.Cookie.set("termsOfServiceAccepted", "true", 30);
+                BS.Cookie.set("${guestNotice.cookieName}", "true", ${guestNotice.cookieDurationDays});
                 BS.Util.hide("guestNotice");
                 this.close();
             }
         });
 
         $j(document).ready(function() {
-            if (!BS.Cookie.get("termsOfServiceAccepted")) {
+            if (!BS.Cookie.get("${guestNotice.cookieName}")) {
                 BS.Util.show("guestNotice");
             }
         });
