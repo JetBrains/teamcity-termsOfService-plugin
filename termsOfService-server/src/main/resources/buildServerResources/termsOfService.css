@@ -16,7 +16,7 @@
 }
 
 .licenseAgreementLink {
-    display: block;
+    margin-left: 1em;
 }
 
 #pageContent .agreement p + h1 {
