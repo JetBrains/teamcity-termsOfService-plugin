@@ -82,7 +82,7 @@ public class AcceptTermsOfServiceController extends BaseController {
 
         for (TermsOfServiceManager.Consent consent : agreement.getConsents()) {
             if (request.getParameter(consent.getId()) != null) {
-                agreement.changeConsentState(user, consent.getId(), true, request);
+                consent.changeAcceptedState(user, true, WebUtil.getRemoteAddress(request));
             }
         }
 

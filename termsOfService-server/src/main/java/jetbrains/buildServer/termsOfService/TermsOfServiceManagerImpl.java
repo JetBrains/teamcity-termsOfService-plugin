@@ -108,7 +108,7 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
                     }
 
                     boolean checked = Boolean.parseBoolean(consentEl.getAttributeValue("default"));
-                    consents.add(new ConsentSettings(id, text, checked));
+                    consents.add(new ConsentImpl(id, text, checked, agreementId));
                 }
             }
 
@@ -236,6 +236,12 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
 
         @NotNull
         @Override
+        public String getVersion() {
+            return params.getOrDefault("version", "1");
+        }
+
+        @NotNull
+        @Override
         public String getShortName() {
             return StringUtil.notNullize(params.get("short-name"), "Terms of Service");
         }
@@ -268,35 +274,20 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
         @Override
         public boolean isAccepted(@NotNull SUser user) {
             String acceptedVersion = user.getPropertyValue(new SimplePropertyKey("teamcity.policy." + id + ".acceptedVersion"));
-            return acceptedVersion != null && VersionComparatorUtil.compare(acceptedVersion, params.getOrDefault("version", "1")) >= 0;
+            return acceptedVersion != null && VersionComparatorUtil.compare(acceptedVersion, getVersion()) >= 0;
         }
 
         @Override
         public void accept(@NotNull SUser user, @NotNull HttpServletRequest request) {
-            user.setUserProperty(new SimplePropertyKey("teamcity.policy." + id + ".acceptedVersion"), params.getOrDefault("version", "1"));
+            user.setUserProperty(new SimplePropertyKey("teamcity.policy." + id + ".acceptedVersion"), getVersion());
             user.setUserProperty(new SimplePropertyKey("teamcity.policy." + id + ".acceptedDate"), new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(timeService.now()));
             user.setUserProperty(new SimplePropertyKey("teamcity.policy." + id + ".acceptedFromIP"), WebUtil.getRemoteAddress(request));
         }
 
         @Override
-        public void changeConsentState(@NotNull SUser user, @NotNull String consentId, boolean agreed, @NotNull HttpServletRequest request) {
-            if (agreed) {
-                user.setUserProperty(new SimplePropertyKey("teamcity.policy." + id + ".consent." + consentId + ".accepted"), "true");
-                user.setUserProperty(new SimplePropertyKey("teamcity.policy." + id + ".consent." + consentId + ".acceptedDate"), new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(timeService.now()));
-                user.setUserProperty(new SimplePropertyKey("teamcity.policy." + id + ".consent." + consentId + ".acceptedFromIP"), WebUtil.getRemoteAddress(request));
-            } else {
-                user.deleteUserProperty(new SimplePropertyKey("teamcity.policy." + id + ".consent." + consentId + ".accepted"));
-                user.deleteUserProperty(new SimplePropertyKey("teamcity.policy." + id + ".consent." + consentId + ".acceptedDate"));
-                user.deleteUserProperty(new SimplePropertyKey("teamcity.policy." + id + ".consent." + consentId + ".acceptedFromIP"));
-            }
-        }
-
-
-        @Override
         public String toString() {
             return "Agreement " + StringUtil.notNullize(params.get("short-name"), "Terms of Service") + " (id = " + id + ")";
         }
-
     }
 
     class ExternalAgreementLinkSettings implements TermsOfServiceManager.ExternalAgreementLink {
@@ -357,17 +348,21 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
         }
     }
 
-    class ConsentSettings implements TermsOfServiceManager.Consent {
+    class ConsentImpl implements TermsOfServiceManager.Consent {
         @NotNull
         private final String id;
         @NotNull
         private final String text;
         private final boolean checked;
 
-        ConsentSettings(@NotNull String id, @NotNull String text, boolean checked) {
+        @NotNull
+        private final String agreementId;
+
+        ConsentImpl(@NotNull String id, @NotNull String text, boolean checked, @NotNull String agreementId) {
             this.id = id;
             this.text = text;
             this.checked = checked;
+            this.agreementId = agreementId;
         }
 
         @NotNull
@@ -385,6 +380,34 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
         @Override
         public String getText() {
             return text;
+        }
+
+        @Override
+        public boolean isAccepted(@NotNull SUser user) {
+            return user.getBooleanProperty(getAcceptedPropertyKey());
+        }
+
+        @Override
+        public void changeAcceptedState(@NotNull SUser user, boolean accepted, @NotNull String acceptedFromIp) {
+            SimplePropertyKey acceptedProp = getAcceptedPropertyKey();
+            SimplePropertyKey acceptedDateProp = new SimplePropertyKey("teamcity.policy." + agreementId + ".consent." + id + ".acceptedDate");
+            SimplePropertyKey acceptedIpProp = new SimplePropertyKey("teamcity.policy." + agreementId + ".consent." + id + ".acceptedFromIP");
+            if (accepted) {
+                if (!user.getBooleanProperty(acceptedProp)){ //don't overwrite if already accepted
+                    user.setUserProperty(acceptedProp, "true");
+                    user.setUserProperty(acceptedDateProp, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(timeService.now()));
+                    user.setUserProperty(acceptedIpProp, acceptedFromIp);
+                }
+            } else {
+                user.deleteUserProperty(acceptedProp);
+                user.deleteUserProperty(acceptedDateProp);
+                user.deleteUserProperty(acceptedIpProp);
+            }
+        }
+
+        @NotNull
+        private SimplePropertyKey getAcceptedPropertyKey() {
+            return new SimplePropertyKey("teamcity.policy." + agreementId + ".consent." + id + ".accepted");
         }
     }
 }

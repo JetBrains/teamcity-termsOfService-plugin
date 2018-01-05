@@ -31,6 +31,9 @@ public interface TermsOfServiceManager {
         String getId();
 
         @NotNull
+        String getVersion();
+
+        @NotNull
         String getShortName();
 
         @NotNull
@@ -49,7 +52,6 @@ public interface TermsOfServiceManager {
 
         void accept(@NotNull SUser user, @NotNull HttpServletRequest request);
 
-        void changeConsentState(@NotNull SUser user, @NotNull String consentId, boolean agreed, @NotNull HttpServletRequest request);
     }
 
     interface GuestNotice {
@@ -67,6 +69,7 @@ public interface TermsOfServiceManager {
     }
 
     interface Consent {
+
         @NotNull
         String getId();
 
@@ -74,6 +77,10 @@ public interface TermsOfServiceManager {
 
         @NotNull
         String getText();
+
+        boolean isAccepted(@NotNull SUser user);
+
+        void changeAcceptedState(@NotNull SUser user, boolean accepted, @NotNull String acceptedFromIp);
     }
 
     interface ExternalAgreementLink {
