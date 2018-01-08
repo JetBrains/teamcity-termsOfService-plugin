@@ -6,7 +6,7 @@ This plugin allows to specify additional license agreement (terms of services, p
 The plugin can be installed from the very beginning of the server existence or added any time later.
 As soon as plugin is installed to the server and configured any user will be redirected to specific page with the text of license agreement before she will be able to perform any further actions.
 
-Plugin configuration is provided in the <TeamCity Data Directory>/config/termsOfService/settings.xml file. 
+Plugin configuration should be provided in the <TeamCity Data Directory>/config/termsOfService/settings.xml file. 
 
 # Possible configurations
 
@@ -17,11 +17,11 @@ If you want any user (except guest) to be aware of certain agreement you should
 * Put the following configuration in `<TeamCity Data Directory>/config/termsOfService/settings.xml` file
 ```xml
     <terms-of-service>
-        <agreement id="privacy_policy"> <!-- Any identifier of the agreement -->
+        <agreement id="privacy_policy"> <!-- Any identifier of the agreement, it's used when persisting the fact of the agreement acceptance by an user-->
             <parameters>
               <param name="content-file" value="agreement.html"/>  <!-- Path to the file containing agreement html, relative to the <TeamCity Data Directory>/config/termsOfService/ directory  -->
-              <param name="short-name" value="Terms"/>  <!-- Name of the link to agreement in footer -->
-              <param name="full-name" value="Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)"/>	<!-- Title of the agreement shown on the agreement page-->
+              <param name="short-name" value="Privacy Policy"/>  <!-- Name of the link to the agreement in footer -->
+              <param name="full-name" value="Privacy Policy for Hosted TeamCity (https://teamcity.jetbrains.com)"/>	<!-- Title of the agreement shown on the agreement page-->
               <param name="version" value="2017.6"/>  <!-- Current version of the agreement. When changed all users will have to accept it again. -->
               <param name="last-updated" value="08 January 2018"/>  <!-- Optional parameter. When defined it will be displayed in a note describing why the user have to accept the agreement again. -->
             </parameters>
@@ -37,12 +37,12 @@ If you want to ask users to agree with a list of consents you should add 'consen
 * `<TeamCity Data Directory>/config/termsOfService/settings.xml`:
 ```xml
     <terms-of-service>
-        <agreement id="privacy_policy"> <!-- Any identifier of the agreement -->
+        <agreement id="privacy_policy">
             <parameters>
-              <param name="content-file" value="agreement.html"/>  <!-- Path to the file containing agreement html, relative to the <TeamCity Data Directory>/config/termsOfService/ directory  -->
-              <param name="short-name" value="Terms"/>  <!-- Name of the link to agreement in footer -->
-              <param name="full-name" value="Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)"/>	<!-- Title of the agreement shown on the agreement page-->
-              <param name="version" value="2017.6"/>  <!-- Current version of the agreement. When changed all users will have to accept it again. -->
+              <param name="content-file" value="agreement.html"/>  
+              <param name="short-name" value="Privacy Policy"/>  
+              <param name="full-name" value="Privacy Policy for Hosted TeamCity (https://teamcity.jetbrains.com)"/>	
+              <param name="version" value="2017.6"/>  
             </parameters>
             <consents>
                 <consent id="newsletter" text="Yes please, I'd like to receive emails about offers and services" default="true"/>
@@ -61,12 +61,12 @@ If in addition you want to display a special notice to the guest user you should
 * Put the following configuration in `<TeamCity Data Directory>/config/termsOfService/settings.xml` file
 ```xml
 <terms-of-service>
-    <agreement id="privacy_policy"> <!-- Any identifier of the agreement -->
+    <agreement id="privacy_policy"> 
         <parameters>
-            <param name="content-file" value="agreement.html"/>  <!-- Path to the file containing agreement html, relative to the <TeamCity Data Directory>/config/termsOfService/ directory  -->
-            <param name="short-name" value="Terms"/>  <!-- Name of the link to agreement in footer -->
-            <param name="full-name" value="Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)"/>	<!-- Title of the agreement shown on the agreement page-->
-            <param name="version" value="2017.6"/>  <!-- Current version of the agreement. When changed all users will have to accept it again. -->
+            <param name="content-file" value="agreement.html"/>  
+            <param name="short-name" value="Privacy Policy"/>  
+            <param name="full-name" value="Privacy Policy for Hosted TeamCity (https://teamcity.jetbrains.com)"/>	
+            <param name="version" value="2017.6"/>  
         </parameters>
     </agreement>
     <guest-notice>
