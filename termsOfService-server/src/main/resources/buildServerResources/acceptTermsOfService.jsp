@@ -3,6 +3,7 @@
 <%--@elvariable id="pageUrl" type="java.lang.String"--%>
 <%--@elvariable id="agreementText" type="java.lang.String"--%>
 <%--@elvariable id="termsOfServiceName" type="java.lang.String"--%>
+<%--@elvariable id="currentUser" type="jetbrains.buildServer.users.SUser"--%>
 <c:set var="name" value="${termsOfServiceName}"/>
 <c:set var="pageTitle" value="${name}"/>
 <bs:externalPage>
@@ -19,15 +20,25 @@
     <bs:_loginPageDecoration id="agreementPage" title="${name}">
     <div class="agreementPage">
       <div class="agreement">
+        <div class="description">
+          <div>
+            <c:out value="${displayReason}"/>
+          </div>
+        </div>
         ${agreementText}
       </div>
       <div class="agreementForm clearfix">
         <form action="${pageUrl}" method="post" onsubmit="if (!this.accept.checked) { alert('Please accept the ${name}'); return false; };">
-          <c:forEach var="consent" items="${consents}">
-            <%--@elvariable id="consent" type="jetbrains.buildServer.termsOfService.TermsOfServiceManager.Consent"--%>
+          <div class="consentBlock">
+            You are logged in as '${currentUser.descriptiveName}'<c:if test="${fn:length(currentUser.email) > 0}"> (<c:out value="${currentUser.email}"/>)</c:if>.
+            Please accept the agreement to proceed.
+            <c:forEach var="consent" items="${consents}">
+              <%--@elvariable id="consent" type="jetbrains.buildServer.termsOfService.TermsOfServiceManager.Consent"--%>
             <p><forms:checkbox name="${consent.id}" checked="${consent.checkedByDefault}"/><label for="${consent.id}" class="rightLabel">${consent.text}</label></p>
-          </c:forEach>
-          <ext:includeExtensions placeId="<%=PlaceId.ACCEPT_LICENSE_SETTING%>"/>
+            </c:forEach>
+            <ext:includeExtensions placeId="<%=PlaceId.ACCEPT_LICENSE_SETTING%>"/>
+          <div>
+
           <div class="continueBlock">
             <forms:submit label="I agree"/>
             &nbsp;

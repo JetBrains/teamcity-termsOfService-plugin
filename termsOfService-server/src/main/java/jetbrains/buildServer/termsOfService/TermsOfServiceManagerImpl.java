@@ -273,13 +273,18 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
 
         @Override
         public boolean isAccepted(@NotNull SUser user) {
-            String acceptedVersion = user.getPropertyValue(new SimplePropertyKey("teamcity.policy." + id + ".acceptedVersion"));
+            String acceptedVersion = user.getPropertyValue(getAcceptedVersionKey());
             return acceptedVersion != null && VersionComparatorUtil.compare(acceptedVersion, getVersion()) >= 0;
         }
 
         @Override
+        public boolean isAnyVersionAccepted(@NotNull SUser user) {
+            return user.getPropertyValue(getAcceptedVersionKey()) != null;
+        }
+
+        @Override
         public void accept(@NotNull SUser user, @NotNull HttpServletRequest request) {
-            user.setUserProperty(new SimplePropertyKey("teamcity.policy." + id + ".acceptedVersion"), getVersion());
+            user.setUserProperty(getAcceptedVersionKey(), getVersion());
             user.setUserProperty(new SimplePropertyKey("teamcity.policy." + id + ".acceptedDate"), new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(timeService.now()));
             user.setUserProperty(new SimplePropertyKey("teamcity.policy." + id + ".acceptedFromIP"), WebUtil.getRemoteAddress(request));
         }
@@ -288,6 +293,12 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
         public String toString() {
             return "Agreement " + StringUtil.notNullize(params.get("short-name"), "Terms of Service") + " (id = " + id + ")";
         }
+
+        @NotNull
+        private SimplePropertyKey getAcceptedVersionKey() {
+            return new SimplePropertyKey("teamcity.policy." + id + ".acceptedVersion");
+        }
+
     }
 
     class ExternalAgreementLinkSettings implements TermsOfServiceManager.ExternalAgreementLink {

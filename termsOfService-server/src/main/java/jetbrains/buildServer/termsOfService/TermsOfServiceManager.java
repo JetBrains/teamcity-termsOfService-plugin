@@ -48,7 +48,15 @@ public interface TermsOfServiceManager {
         @NotNull
         List<Consent> getConsents();
 
+        /**
+         * Check whether the user have accepted the latest version of the agreement.
+         */
         boolean isAccepted(@NotNull SUser user);
+
+        /**
+         * Check whether the user have accepted any version of the agreement.
+         */
+        boolean isAnyVersionAccepted(@NotNull SUser user);
 
         void accept(@NotNull SUser user, @NotNull HttpServletRequest request);
 

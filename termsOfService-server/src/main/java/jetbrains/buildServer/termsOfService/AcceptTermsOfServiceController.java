@@ -72,6 +72,13 @@ public class AcceptTermsOfServiceController extends BaseController {
         view.addObject("agreementText", agreement.getHtml());
         view.addObject("termsOfServiceName", agreement.getFullName());
         view.addObject("consents", agreement.getConsents());
+        if (agreement.isAnyVersionAccepted(user)) {
+            view.addObject("displayReason", "We've updated the " + agreement.getShortName() + " agreement, " +
+                    "please scroll down and click “I agree” when you’re ready to continue to use TeamCity.");
+        } else {
+            view.addObject("displayReason", "You have to accept the "  + agreement.getShortName() + " agreement before continue using TeamCity, " +
+                    "please scroll down and click “I agree” when you’re ready to continue.");
+        }
         return view;
     }
 

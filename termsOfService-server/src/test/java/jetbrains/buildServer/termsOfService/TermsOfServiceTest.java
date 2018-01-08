@@ -193,6 +193,9 @@ public class TermsOfServiceTest extends BaseTestCase {
 
         login(createUser("user1"));
 
+        Map<String, Object> model = GET_Accept_Agreement_Page("hosted_teamcity");
+        then(((String) model.get("displayReason"))).contains("You have to accept the Terms of Service agreement");
+
         POST_Accept_Agreement_Page("hosted_teamcity");
         assertOverviewPageAccessible();
 
@@ -207,6 +210,9 @@ public class TermsOfServiceTest extends BaseTestCase {
                 "    </agreement>\n" +
                 "</terms-of-service>");
         assertOverviewPageRedirectsToAgreement("hosted_teamcity");
+
+        model = GET_Accept_Agreement_Page("hosted_teamcity");
+        then(((String) model.get("displayReason"))).contains("We've updated the Terms of Service agreement");
 
         POST_Accept_Agreement_Page("hosted_teamcity");
         assertOverviewPageAccessible();
