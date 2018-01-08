@@ -69,15 +69,11 @@ public class AcceptTermsOfServiceController extends BaseController {
 
     private ModelAndView show(@NotNull SUser user, @NotNull TermsOfServiceManager.Agreement agreement) {
         ModelAndView view = new ModelAndView(agreement.isAccepted(user) ? myResourcesPath + TERMS_OF_SERVICE_JSP : myResourcesPath + ACCEPT_TERMS_OF_SERVICE_JSP);
-        view.addObject("agreementText", agreement.getHtml());
-        view.addObject("termsOfServiceName", agreement.getFullName());
-        view.addObject("consents", agreement.getConsents());
+        view.addObject("agreement", agreement);
         if (agreement.isAnyVersionAccepted(user)) {
-            view.addObject("displayReason", "We've updated the " + agreement.getShortName() + " agreement, " +
-                    "please scroll down and click “I agree” when you’re ready to continue to use TeamCity.");
+            view.addObject("displayReason", DisplayReason.NEW_VERSION);
         } else {
-            view.addObject("displayReason", "You have to accept the "  + agreement.getShortName() + " agreement before continue using TeamCity, " +
-                    "please scroll down and click “I agree” when you’re ready to continue.");
+            view.addObject("displayReason", DisplayReason.NOT_ACCEPTED);
         }
         return view;
     }
@@ -99,6 +95,12 @@ public class AcceptTermsOfServiceController extends BaseController {
         }
         response.sendRedirect(next);
         return null;
+    }
+
+    public enum DisplayReason {
+        NEW_VERSION /*New version of the agreement was introduced*/,
+
+        NOT_ACCEPTED /*Agreement was not accepted by the user*/
     }
 
 }

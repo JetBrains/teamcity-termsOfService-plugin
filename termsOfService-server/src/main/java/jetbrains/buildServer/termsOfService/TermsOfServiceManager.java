@@ -58,6 +58,9 @@ public interface TermsOfServiceManager {
          */
         boolean isAnyVersionAccepted(@NotNull SUser user);
 
+        @Nullable
+        String getLastUpdated();
+
         void accept(@NotNull SUser user, @NotNull HttpServletRequest request);
 
     }

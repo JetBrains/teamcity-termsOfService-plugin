@@ -1,10 +1,14 @@
 <%@ page import="jetbrains.buildServer.web.openapi.PlaceId" %>
+<%@ page import="jetbrains.buildServer.termsOfService.AcceptTermsOfServiceController" %>
 <%@include file="/include-internal.jsp"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<c:set var="newVersionDisplayMode" value="<%=AcceptTermsOfServiceController.DisplayReason.NEW_VERSION%>"/>
+<c:set var="notAcceptedDisplayMode" value="<%=AcceptTermsOfServiceController.DisplayReason.NOT_ACCEPTED%>"/>
 <%--@elvariable id="pageUrl" type="java.lang.String"--%>
-<%--@elvariable id="agreementText" type="java.lang.String"--%>
-<%--@elvariable id="termsOfServiceName" type="java.lang.String"--%>
+<%--@elvariable id="agreement" type="jetbrains.buildServer.termsOfService.TermsOfServiceManager.Agreement"--%>
 <%--@elvariable id="currentUser" type="jetbrains.buildServer.users.SUser"--%>
-<c:set var="name" value="${termsOfServiceName}"/>
+<%--@elvariable id="displayReason" type="jetbrains.buildServer.termsOfService.AcceptTermsOfServiceController.DisplayReason"--%>
+<c:set var="name" value="${agreement.fullName}"/>
 <c:set var="pageTitle" value="${name}"/>
 <bs:externalPage>
   <jsp:attribute name="page_title">${pageTitle}</jsp:attribute>
@@ -22,18 +26,25 @@
       <div class="agreement">
         <div class="description">
           <div>
-            <c:out value="${displayReason}"/>
+            <c:choose>
+              <c:when test="${displayReason eq newVersionDisplayMode}">
+                  We've updated the <c:out value="${agreement.shortName}"/> agreement<c:if test="${agreement.lastUpdated != null}"> on ${agreement.lastUpdated}</c:if>, please scroll down and click “I agree” when you're ready to continue to use TeamCity.
+              </c:when>
+              <c:when test="${displayReason eq notAcceptedDisplayMode}">
+                  You have to accept the <c:out value="${agreement.shortName}"/> agreement before continue using TeamCity,
+                  please scroll down and click “I agree” when you're ready to continue.
+              </c:when>
+            </c:choose>
           </div>
         </div>
-        ${agreementText}
+        ${agreement.html}
       </div>
       <div class="agreementForm clearfix">
         <form action="${pageUrl}" method="post" onsubmit="if (!this.accept.checked) { alert('Please accept the ${name}'); return false; };">
           <div class="consentBlock">
             You are logged in as '${currentUser.descriptiveName}'<c:if test="${fn:length(currentUser.email) > 0}"> (<c:out value="${currentUser.email}"/>)</c:if>.
             Please accept the agreement to proceed.
-            <c:forEach var="consent" items="${consents}">
-              <%--@elvariable id="consent" type="jetbrains.buildServer.termsOfService.TermsOfServiceManager.Consent"--%>
+            <c:forEach var="consent" items="${agreement.consents}">
             <p><forms:checkbox name="${consent.id}" checked="${consent.checkedByDefault}"/><label for="${consent.id}" class="rightLabel">${consent.text}</label></p>
             </c:forEach>
             <ext:includeExtensions placeId="<%=PlaceId.ACCEPT_LICENSE_SETTING%>"/>

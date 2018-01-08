@@ -163,8 +163,8 @@ public class TermsOfServiceTest extends BaseTestCase {
         assertOverviewPageRedirectsToAgreement("hosted_teamcity");
 
         Map<String, Object> model = GET_Accept_Agreement_Page("hosted_teamcity");
-        then(model.get("agreementText")).isEqualTo(FileUtil.readText(myAgreementFile, "UTF-8"));
-        then(model.get("termsOfServiceName")).isEqualTo("Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)");
+        then(((TermsOfServiceManager.Agreement) model.get("agreement")).getHtml()).isEqualTo(FileUtil.readText(myAgreementFile, "UTF-8"));
+        then(((TermsOfServiceManager.Agreement) model.get("agreement")).getFullName()).isEqualTo("Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)");
 
         POST_Accept_Agreement_Page("hosted_teamcity");
         then(termsOfServiceManager.getMustAcceptAgreements(user)).hasSize(0);
@@ -194,7 +194,7 @@ public class TermsOfServiceTest extends BaseTestCase {
         login(createUser("user1"));
 
         Map<String, Object> model = GET_Accept_Agreement_Page("hosted_teamcity");
-        then(((String) model.get("displayReason"))).contains("You have to accept the Terms of Service agreement");
+        then(model.get("displayReason")).isEqualTo(AcceptTermsOfServiceController.DisplayReason.NOT_ACCEPTED);
 
         POST_Accept_Agreement_Page("hosted_teamcity");
         assertOverviewPageAccessible();
@@ -202,17 +202,19 @@ public class TermsOfServiceTest extends BaseTestCase {
         writeConfig("<terms-of-service>\n" +
                 "    <agreement id=\"hosted_teamcity\">\n" +
                 "        <parameters>\n" +
-                "          \t<param name=\"content-file\" value=\"agreement.html\"/>\n" +
-                "          \t<param name=\"version\" value=\"2017.2\"/>\n" +
-                "            <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
-                "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
+                "           <param name=\"content-file\" value=\"agreement.html\"/>\n" +
+                "           <param name=\"version\" value=\"2017.2\"/>\n" +
+                "           <param name=\"last-updated\" value=\"08 January 2018\"/>\n" +
+                "           <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
+                "           <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
                 "        </parameters>\n" +
                 "    </agreement>\n" +
                 "</terms-of-service>");
         assertOverviewPageRedirectsToAgreement("hosted_teamcity");
 
         model = GET_Accept_Agreement_Page("hosted_teamcity");
-        then(((String) model.get("displayReason"))).contains("We've updated the Terms of Service agreement");
+        then(model.get("displayReason")).isEqualTo(AcceptTermsOfServiceController.DisplayReason.NEW_VERSION);
+        then(((TermsOfServiceManager.Agreement) model.get("agreement")).getLastUpdated()).isEqualTo("08 January 2018");
 
         POST_Accept_Agreement_Page("hosted_teamcity");
         assertOverviewPageAccessible();
@@ -240,7 +242,7 @@ public class TermsOfServiceTest extends BaseTestCase {
         assertOverviewPageRedirectsToAgreement("hosted_teamcity");
 
         Map<String, Object> model = GET_Accept_Agreement_Page("hosted_teamcity");
-        then((List<TermsOfServiceManager.Consent>) model.get("consents")).extracting(TermsOfServiceManager.Consent::getId).contains("analytics", "marketing");
+        then(((TermsOfServiceManager.Agreement) model.get("agreement")).getConsents()).extracting(TermsOfServiceManager.Consent::getId).contains("analytics", "marketing");
 
         POST_Accept_Agreement_Page("hosted_teamcity", "analytics");
         then(termsOfServiceManager.getMustAcceptAgreements(user)).hasSize(0);
@@ -310,8 +312,8 @@ public class TermsOfServiceTest extends BaseTestCase {
         assertOverviewPageRedirectsToAgreement("hosted_teamcity");
 
         Map<String, Object> model = GET_Accept_Agreement_Page("hosted_teamcity");
-        then(model.get("agreementText")).isEqualTo(FileUtil.readText(myAgreementFile, "UTF-8"));
-        then(model.get("termsOfServiceName")).isEqualTo("Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)");
+        then(((TermsOfServiceManager.Agreement) model.get("agreement")).getHtml()).isEqualTo(FileUtil.readText(myAgreementFile, "UTF-8"));
+        then(((TermsOfServiceManager.Agreement) model.get("agreement")).getFullName()).isEqualTo("Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)");
 
         POST_Accept_Agreement_Page("hosted_teamcity");
 

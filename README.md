@@ -23,6 +23,7 @@ If you want any user (except guest) to be aware of certain agreement you should
               <param name="short-name" value="Terms"/>  <!-- Name of the link to agreement in footer -->
               <param name="full-name" value="Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)"/>	<!-- Title of the agreement shown on the agreement page-->
               <param name="version" value="2017.6"/>  <!-- Current version of the agreement. When changed all users will have to accept it again. -->
+              <param name="last-updated" value="08 January 2018"/>  <!-- Optional parameter. When defined it will be displayed in a note describing why the user have to accept the agreement again. -->
             </parameters>
         </agreement>
     </terms-of-service>

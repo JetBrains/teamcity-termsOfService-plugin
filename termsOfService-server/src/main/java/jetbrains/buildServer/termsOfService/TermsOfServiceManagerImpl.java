@@ -8,6 +8,7 @@ import jetbrains.buildServer.util.*;
 import jetbrains.buildServer.web.util.WebUtil;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.concurrent.ThreadSafe;
 import javax.servlet.http.HttpServletRequest;
@@ -280,6 +281,12 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
         @Override
         public boolean isAnyVersionAccepted(@NotNull SUser user) {
             return user.getPropertyValue(getAcceptedVersionKey()) != null;
+        }
+
+        @Nullable
+        @Override
+        public String getLastUpdated() {
+            return params.get("last-updated");
         }
 
         @Override
