@@ -12,6 +12,7 @@ Plugin configuration should be provided in the <TeamCity Data Directory>/config/
 * Donwload the latest plugin build [here](https://teamcity.jetbrains.com/viewType.html?buildTypeId=TeamCityPluginsByJetBrains_TeamcityTermsOfServicePlugin_Build&guest=1)
 * [Install the plugin](https://confluence.jetbrains.com/display/TCDL/Installing+Additional+Plugins)
 * Configure the plugin as described below
+* The plugin is compatible with TeamCity versions starting from 2017.1
 
 # Possible configurations
 
