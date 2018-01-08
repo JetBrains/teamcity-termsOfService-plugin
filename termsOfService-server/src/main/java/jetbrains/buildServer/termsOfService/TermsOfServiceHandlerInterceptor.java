@@ -1,9 +1,7 @@
 package jetbrains.buildServer.termsOfService;
 
 
-import jetbrains.buildServer.controllers.interceptors.PathSet;
 import jetbrains.buildServer.controllers.interceptors.TeamCityHandlerInterceptor;
-import jetbrains.buildServer.controllers.login.RememberUrl;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.web.util.SessionUser;
 import jetbrains.buildServer.web.util.WebUtil;
@@ -15,19 +13,13 @@ import java.util.List;
 
 public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerInterceptor {
 
+    public static final String PROCEED_URL_PARAM = "proceedUrl";
+
     @NotNull
     private final TermsOfServiceManager myManager;
 
-    @NotNull
-    private final PathSet myNonMemorizablePaths = new PathSet();
-
     public TermsOfServiceHandlerInterceptor(@NotNull TermsOfServiceManager manager) {
         myManager = manager;
-    }
-
-    public void setNonMemorizablePaths(final List<String> nonMemorizablePaths) {
-        myNonMemorizablePaths.clear();
-        myNonMemorizablePaths.addAll(nonMemorizablePaths);
     }
 
     public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response) throws Exception {
@@ -54,12 +46,8 @@ public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerIntercep
         TermsOfServiceManager.Agreement agreement = mustAcceptAgreements.get(0);
 
         if (!path.startsWith(AcceptTermsOfServiceController.PATH)) {
-            String requestUrl = WebUtil.getRequestUrl(request);
-            String entryPoint = AcceptTermsOfServiceController.PATH + "?agreement=" + agreement.getId();
-            TermsOfServiceLogger.LOGGER.debug(String.format("Will redirect to %s. Remembered original request url %s", entryPoint, requestUrl));
-            if (!myNonMemorizablePaths.matches(path)) {
-                RememberUrl.remember(request, requestUrl);
-            }
+            String entryPoint = AcceptTermsOfServiceController.PATH + "?agreement=" + agreement.getId() + "&" + PROCEED_URL_PARAM + "=" + WebUtil.encode(WebUtil.getRequestUrl(request));
+            TermsOfServiceLogger.LOGGER.debug(String.format("Will redirect to %s. ", entryPoint));
             response.sendRedirect(request.getContextPath() + entryPoint);
             return false;
         }

@@ -89,7 +89,7 @@ public class AcceptTermsOfServiceController extends BaseController {
             }
         }
 
-        String next = RememberUrl.readAndForget(request);
+        String next = request.getParameter(TermsOfServiceHandlerInterceptor.PROCEED_URL_PARAM);
         if (next == null) {
             next = OverviewController.getOverviewPageUrl(request);
         }

@@ -31,10 +31,10 @@
                   We've updated the <c:out value="${agreement.shortName}"/> agreement<c:if test="${agreement.lastUpdated != null}"> on ${agreement.lastUpdated}</c:if>.
               </c:when>
               <c:when test="${displayReason eq notAcceptedDisplayMode}">
-                  You have to accept the <c:out value="${agreement.shortName}"/> agreement before you can continue to use TeamCity
+                  You have to accept the <c:out value="${agreement.shortName}"/> agreement before you can continue to use TeamCity.
               </c:when>
             </c:choose>
-            Review the terms and click "I agree" when you’re ready to continue using TeamCity.
+            Review the terms and click "I agree" when you're ready to continue using TeamCity.
           </div>
         </div>
         ${agreement.html}

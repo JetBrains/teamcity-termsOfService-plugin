@@ -422,7 +422,7 @@ public class TermsOfServiceTest extends BaseTestCase {
     private void assertOverviewPageRedirectsToAgreement(@NotNull String agreementId) throws Exception {
         newRequest(GET, "/overview.html");
         then(interceptor.preHandle(request, response)).isFalse();
-        then(response.getRedirectedUrl()).isEqualTo("/acceptTermsOfServices.html?agreement=" + agreementId);
+        then(response.getRedirectedUrl()).isEqualTo("/acceptTermsOfServices.html?agreement=" + agreementId + "&proceedUrl=%2Foverview.html");
     }
 
     private void newRequest(HttpMethod method, String url) {
