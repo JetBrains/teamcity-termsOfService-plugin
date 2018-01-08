@@ -7,6 +7,11 @@ The plugin can be installed from the very beginning of the server existence or a
 As soon as plugin is installed to the server and configured any user will be redirected to specific page with the text of license agreement before she will be able to perform any further actions.
 
 Plugin configuration should be provided in the <TeamCity Data Directory>/config/termsOfService/settings.xml file. 
+    
+# Installation
+* Donwload the latest plugin build [here](https://teamcity.jetbrains.com/viewType.html?buildTypeId=TeamCityPluginsByJetBrains_TeamcityTermsOfServicePlugin_Build&guest=1)
+* [Install the plugin](https://confluence.jetbrains.com/display/TCDL/Installing+Additional+Plugins)
+* Configure the plugin as described below
 
 # Possible configurations
 
