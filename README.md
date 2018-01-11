@@ -1,20 +1,18 @@
 # TeamCity Terms Of Services Plugin
 
-By default every TeamCity installation requires the server administrator only to read and accept one main license agreement. 
-This plugin allows to specify additional license agreement (terms of services, privacy policy) that should be read and accepted by all other TeamCity users before they can interact with the service any further. 
+This TeamCity plugin allows to show an additional license agreement (terms of services, privacy policy) to all the TeamCity server users and require users to accept the agreement before they can interact with the service any further. The plugin can be useful for implementing GDPR requirements for the TeamCity instalaltion.
 
-The plugin can be installed from the very beginning of the server existence or added any time later.
-As soon as plugin is installed to the server and configured any user will be redirected to specific page with the text of license agreement before she will be able to perform any further actions.
+As soon as the plugin is installed and configured correctly, all the users will be redirected to a page with the text of license agreement before they will be able to perform any further actions. This occurrs on the next action in web UI for the current users or right after login for newly logging in users.
 
-Plugin configuration should be provided in the <TeamCity Data Directory>/config/termsOfService/settings.xml file. 
-    
+The plugin is compatible with TeamCity 2017.1 and later.
+
 # Installation
-* Donwload the latest plugin build [here](https://teamcity.jetbrains.com/viewType.html?buildTypeId=TeamCityPluginsByJetBrains_TeamcityTermsOfServicePlugin_Build&guest=1)
+* Donwload the  [latest plugin build](https://teamcity.jetbrains.com/viewType.html?buildTypeId=TeamCityPluginsByJetBrains_TeamcityTermsOfServicePlugin_Build&guest=1)
 * [Install the plugin](https://confluence.jetbrains.com/display/TCDL/Installing+Additional+Plugins)
-* Configure the plugin as described below
-* The plugin is compatible with TeamCity versions starting from 2017.1
 
-# Possible configurations
+# Configuration
+The plugin is configured using the settings file `<TeamCity Data Directory>/config/termsOfService/settings.xml`. Until a valid file is found in the location, the plugin does not change any behavior. The file is automatically reloaded while the server is running. In case the file is invalid, teamcity-server.log gets related warnings with "TermsOfService" category.
+Upon first plugin installation the "termsOfService" directory and a file in it should be created manually.
 
 ## Force all users except guest to accept the agreement 
 
@@ -23,7 +21,7 @@ If you want any user (except guest) to be aware of certain agreement you should
 * Put the following configuration in `<TeamCity Data Directory>/config/termsOfService/settings.xml` file
 ```xml
     <terms-of-service>
-        <agreement id="privacy_policy"> <!-- Any identifier of the agreement, it's used when persisting the fact of the agreement acceptance by an user-->
+        <agreement id="privacy_policy"> <!-- Any identifier of the agreement, it's used when persisting the fact of the agreement acceptance by a user-->
             <parameters>
               <param name="content-file" value="agreement.html"/>  <!-- Path to the file containing agreement html, relative to the <TeamCity Data Directory>/config/termsOfService/ directory  -->
               <param name="short-name" value="Privacy Policy"/>  <!-- Name of the link to the agreement in footer -->
