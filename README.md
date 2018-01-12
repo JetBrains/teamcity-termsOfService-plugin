@@ -99,10 +99,10 @@ If you want to additionally display a special notice to the guest user, do the f
 
 The data related to the agreement acceptance by a user is saved and can be fetched from the user properties:
 
-* _teamcity.policy.<agreement_id>.acceptedDate_ - the date when the agreement was accepted
-* _teamcity.policy.<agreement_id>.acceptedFromIP_ - the IP address of the request when the user accepts the agreement
-* _teamcity.policy.<agreement_id>.acceptedVersion_ - the version of the agreement that was accepted by the user. 
-* _teamcity.policy.<agreement_id>.consent.<consent_id>.accepted_ - true if the consent was accepted
-* _teamcity.policy.<agreement_id>.consent.<consent_id>.acceptedDate_ - the date when the consent was accepted
-* _teamcity.policy.<agreement_id>.consent.<consent_id>.acceptedFromIP_ - the IP address of the request when the user accepts the consent
+* _teamcity.termsOfService.<agreement_id>.acceptedDate_ - the date when the agreement was accepted
+* _teamcity.termsOfService.<agreement_id>.acceptedFromIP_ - the IP address of the request when the user accepts the agreement
+* _teamcity.termsOfService.<agreement_id>.acceptedVersion_ - the version of the agreement that was accepted by the user. 
+* _teamcity.termsOfService.<agreement_id>.consent.<consent_id>.accepted_ - true if the consent was accepted
+* _teamcity.termsOfService.<agreement_id>.consent.<consent_id>.acceptedDate_ - the date when the consent was accepted
+* _teamcity.termsOfService.<agreement_id>.consent.<consent_id>.acceptedFromIP_ - the IP address of the request when the user accepts the consent
 

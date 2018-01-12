@@ -584,22 +584,22 @@ public class TermsOfServiceTest extends BaseTestCase {
 
     private void assertAgreementUserProperties(@NotNull String agreementId, @NotNull String version, @NotNull String acceptedIp, long acceptedDate) {
         SUser user = SessionUser.getUser(request);
-        then(user.getPropertyValue(new SimplePropertyKey("teamcity.policy." + agreementId + ".acceptedVersion"))).isEqualTo(version);
-        then(user.getPropertyValue(new SimplePropertyKey("teamcity.policy." + agreementId + ".acceptedFromIP"))).isEqualTo(acceptedIp);
-        then(user.getPropertyValue(new SimplePropertyKey("teamcity.policy." + agreementId + ".acceptedDate"))).isEqualTo(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(acceptedDate));
+        then(user.getPropertyValue(new SimplePropertyKey("teamcity.termsOfService." + agreementId + ".acceptedVersion"))).isEqualTo(version);
+        then(user.getPropertyValue(new SimplePropertyKey("teamcity.termsOfService." + agreementId + ".acceptedFromIP"))).isEqualTo(acceptedIp);
+        then(user.getPropertyValue(new SimplePropertyKey("teamcity.termsOfService." + agreementId + ".acceptedDate"))).isEqualTo(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(acceptedDate));
     }
 
     private void assertConsentAccepted(@NotNull String agreementId, @NotNull String consent, @NotNull String acceptedIp, long acceptedDate) {
         SUser user = SessionUser.getUser(request);
-        then(user.getPropertyValue(new SimplePropertyKey("teamcity.policy." + agreementId + ".consent." + consent + ".accepted"))).isEqualTo("true");
-        then(user.getPropertyValue(new SimplePropertyKey("teamcity.policy." + agreementId + ".consent." + consent + ".acceptedFromIP"))).isEqualTo(acceptedIp);
-        then(user.getPropertyValue(new SimplePropertyKey("teamcity.policy." + agreementId + ".consent." + consent + ".acceptedDate"))).isEqualTo(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(acceptedDate));
+        then(user.getPropertyValue(new SimplePropertyKey("teamcity.termsOfService." + agreementId + ".consent." + consent + ".accepted"))).isEqualTo("true");
+        then(user.getPropertyValue(new SimplePropertyKey("teamcity.termsOfService." + agreementId + ".consent." + consent + ".acceptedFromIP"))).isEqualTo(acceptedIp);
+        then(user.getPropertyValue(new SimplePropertyKey("teamcity.termsOfService." + agreementId + ".consent." + consent + ".acceptedDate"))).isEqualTo(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(acceptedDate));
     }
 
     private void assertConsentNotAccepted(@NotNull String agreementId, @NotNull String consent) {
         SUser user = SessionUser.getUser(request);
-        then(user.getPropertyValue(new SimplePropertyKey("teamcity.policy." + agreementId + ".consent." + consent + ".accepted"))).isNull();
-        then(user.getPropertyValue(new SimplePropertyKey("teamcity.policy." + agreementId + ".consent." + consent + ".acceptedFromIP"))).isNull();
-        then(user.getPropertyValue(new SimplePropertyKey("teamcity.policy." + agreementId + ".consent." + consent + ".acceptedDate"))).isNull();
+        then(user.getPropertyValue(new SimplePropertyKey("teamcity.termsOfService." + agreementId + ".consent." + consent + ".accepted"))).isNull();
+        then(user.getPropertyValue(new SimplePropertyKey("teamcity.termsOfService." + agreementId + ".consent." + consent + ".acceptedFromIP"))).isNull();
+        then(user.getPropertyValue(new SimplePropertyKey("teamcity.termsOfService." + agreementId + ".consent." + consent + ".acceptedDate"))).isNull();
     }
 }

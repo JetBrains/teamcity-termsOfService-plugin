@@ -320,8 +320,8 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
         @Override
         public void accept(@NotNull SUser user, @NotNull HttpServletRequest request) {
             user.setUserProperty(getAcceptedVersionKey(), getVersion());
-            user.setUserProperty(new SimplePropertyKey("teamcity.policy." + id + ".acceptedDate"), new SimpleDateFormat(ACCEPTED_DATE_FORMAT).format(timeService.now()));
-            user.setUserProperty(new SimplePropertyKey("teamcity.policy." + id + ".acceptedFromIP"), WebUtil.getRemoteAddress(request));
+            user.setUserProperty(new SimplePropertyKey("teamcity.termsOfService." + id + ".acceptedDate"), new SimpleDateFormat(ACCEPTED_DATE_FORMAT).format(timeService.now()));
+            user.setUserProperty(new SimplePropertyKey("teamcity.termsOfService." + id + ".acceptedFromIP"), WebUtil.getRemoteAddress(request));
         }
 
         @Override
@@ -331,7 +331,7 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
 
         @NotNull
         private SimplePropertyKey getAcceptedVersionKey() {
-            return new SimplePropertyKey("teamcity.policy." + id + ".acceptedVersion");
+            return new SimplePropertyKey("teamcity.termsOfService." + id + ".acceptedVersion");
         }
 
     }
@@ -436,8 +436,8 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
         @Override
         public void changeAcceptedState(@NotNull SUser user, boolean accepted, @NotNull String acceptedFromIp) {
             SimplePropertyKey acceptedProp = getAcceptedPropertyKey();
-            SimplePropertyKey acceptedDateProp = new SimplePropertyKey("teamcity.policy." + agreementId + ".consent." + id + ".acceptedDate");
-            SimplePropertyKey acceptedIpProp = new SimplePropertyKey("teamcity.policy." + agreementId + ".consent." + id + ".acceptedFromIP");
+            SimplePropertyKey acceptedDateProp = new SimplePropertyKey("teamcity.termsOfService." + agreementId + ".consent." + id + ".acceptedDate");
+            SimplePropertyKey acceptedIpProp = new SimplePropertyKey("teamcity.termsOfService." + agreementId + ".consent." + id + ".acceptedFromIP");
             if (accepted) {
                 if (!user.getBooleanProperty(acceptedProp)){ //don't overwrite if already accepted
                     user.setUserProperty(acceptedProp, "true");
@@ -453,7 +453,7 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
 
         @NotNull
         private SimplePropertyKey getAcceptedPropertyKey() {
-            return new SimplePropertyKey("teamcity.policy." + agreementId + ".consent." + id + ".accepted");
+            return new SimplePropertyKey("teamcity.termsOfService." + agreementId + ".consent." + id + ".accepted");
         }
     }
 }
