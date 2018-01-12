@@ -200,6 +200,34 @@ public class TermsOfServiceTest extends BaseTestCase {
         then(model.get("termsOfServiceName")).isEqualTo("Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)");
     }
 
+    /**
+     * Is a user is using TeamCity while the agreement is configured then the agreement should not be shown to him,
+     * but must be shown for any new sessions.
+     */
+    @Test
+    public void should_not_show_just_configured_agreement_to_currently_active_users() throws Exception {
+        login(createUser("user1"));
+        assertOverviewPageAccessible();
+
+        writeConfig("<terms-of-service>\n" +
+                "    <agreement id=\"hosted_teamcity\">\n" +
+                "        <parameters>\n" +
+                "          \t<param name=\"content-file\" value=\"agreement.html\"/>\n" +
+                "          \t<param name=\"version\" value=\"2017.1\"/>\n" +
+                "            <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
+                "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
+                "        </parameters>\n" +
+                "    </agreement>\n" +
+                "</terms-of-service>");
+
+        assertOverviewPageAccessible();
+
+        relogin();
+
+        assertOverviewPageRedirectsToAgreement("hosted_teamcity");
+        assertOverviewPageRedirectsToAgreement("hosted_teamcity");//second request must also redirect to the agreement
+    }
+
     @Test
     public void should_support_version_changes() throws Exception {
         writeConfig("<terms-of-service>\n" +
@@ -232,6 +260,7 @@ public class TermsOfServiceTest extends BaseTestCase {
                 "        </parameters>\n" +
                 "    </agreement>\n" +
                 "</terms-of-service>");
+        relogin();
         assertOverviewPageRedirectsToAgreement("hosted_teamcity");
 
         model = GET_Accept_Agreement_Page("hosted_teamcity");
@@ -463,6 +492,11 @@ public class TermsOfServiceTest extends BaseTestCase {
         return user;
     }
 
+    private void relogin() {
+        session.invalidate();
+        session = new MockHttpSession();
+    }
+
     private Map<String, Object> GET_View_Agreement_Page(@NotNull String agreementId) throws IOException {
         newRequest(GET, "/viewTermsOfServices.html?agreement=" + agreementId);
         request.addParameter("agreement", agreementId);
@@ -492,7 +526,7 @@ public class TermsOfServiceTest extends BaseTestCase {
         return (TermsOfServiceUserProfileExtension.Form) userConsentsExtension.doGet(request, response).getModel().get("form");
     }
 
-    private void POST_User_Consents_Page(String... acceptedConsents) throws IOException {
+    private void POST_User_Consents_Page(String... acceptedConsents) {
         newRequest(POST, TermsOfServiceUserProfileExtension.PATH);
         for (String acceptedConsent : acceptedConsents) {
             request.addParameter(acceptedConsent, "true");

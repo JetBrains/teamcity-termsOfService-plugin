@@ -2,7 +2,8 @@
 
 This TeamCity plugin allows displaying an additional license agreement (terms of services, privacy policy) to all the TeamCity server users and requiring users to accept the agreement before they can continue to interact with the service. The plugin can be useful for implementing GDPR requirements for a TeamCity installation.
 
-As soon as the plugin is installed and configured correctly, all the users will be redirected to the page with the text of the license agreement before they are able to perform any further actions. This occurrs on the next action in the web UI for the current users or right after the login for the newly logging in users.
+As soon as the plugin is installed and configured correctly, all the newly logged in users will be redirected to the page with the text of the license agreement before they are able to perform any further actions. 
+This doesn't occur for the users who are currently using Web UI.
 
 The plugin is compatible with TeamCity 2017.1 and later.
 

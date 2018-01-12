@@ -9,11 +9,13 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.util.List;
 
 public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerInterceptor {
 
     public static final String PROCEED_URL_PARAM = "proceedUrl";
+    private static final String SESSION_DOES_NOT_REQUIRE_PROCESSING_ATTR = "TeamCity_TermsOfService_SessionProcessed";
 
     @NotNull
     private final TermsOfServiceManager myManager;
@@ -34,12 +36,20 @@ public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerIntercep
         }
 
         SUser user = SessionUser.getUser(request);
-        if (user == null) {
+        HttpSession session = request.getSession();
+
+        if (user == null || session == null) {
+            return true;
+        }
+
+        if (session.getAttribute(SESSION_DOES_NOT_REQUIRE_PROCESSING_ATTR) != null) {
             return true;
         }
 
         List<TermsOfServiceManager.Agreement> mustAcceptAgreements = myManager.getMustAcceptAgreements(user);
+
         if (mustAcceptAgreements.isEmpty()) {
+            session.setAttribute(SESSION_DOES_NOT_REQUIRE_PROCESSING_ATTR, true);
             return true;
         }
 
