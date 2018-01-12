@@ -75,6 +75,7 @@ public class TermsOfServiceTest extends BaseTestCase {
     private List<SUser> users;
     private TermsOfServiceUserProfileExtension userConsentsExtension;
     private long currentTime;
+    private ServerPaths serverPaths;
 
     @Override
     @BeforeMethod
@@ -100,7 +101,7 @@ public class TermsOfServiceTest extends BaseTestCase {
         PagePlaces pagePlaces = Mockito.mock(PagePlaces.class);
         when(pagePlaces.getPlaceById(any())).thenReturn(Mockito.mock(PagePlace.class));
 
-        ServerPaths serverPaths = new ServerPaths(createTempDir());
+        serverPaths = new ServerPaths(createTempDir());
         FileWatcherFactory fileWatcherFactory = new FileWatcherFactory(serverPaths, new CriticalErrorsImpl(serverPaths), events);
         File termsOfServiceDir = new File(serverPaths.getConfigDir(), "termsOfService");
         configFile = new File(termsOfServiceDir, "settings.xml");
@@ -134,6 +135,27 @@ public class TermsOfServiceTest extends BaseTestCase {
                 "    <agreement id=\"hosted_teamcity\">\n" +
                 "        <parameters>\n" +
                 "          \t<param name=\"content-file\" value=\"not_extisting.html\"/>\n" +
+                "          \t<param name=\"version\" value=\"2017.1\"/>\n" +
+                "            <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
+                "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
+                "        </parameters>\n" +
+                "    </agreement>\n" +
+                "</terms-of-service>");
+
+        login(createUser("user1"));
+
+        assertAgreementNotShown("hosted_teamcity");
+    }
+
+    @Test
+    public void attempt_to_reference_content_file_out_of_termsOfService_configs_directory() throws Exception {
+        File mainConfig = new File(serverPaths.getConfigDir(), "main-config.xml");
+        FileUtil.writeFileAndReportErrors(mainConfig, "some config");
+
+        writeConfig("<terms-of-service>\n" +
+                "    <agreement id=\"hosted_teamcity\">\n" +
+                "        <parameters>\n" +
+                "          \t<param name=\"content-file\" value=\"../main-config.xml\"/>\n" +
                 "          \t<param name=\"version\" value=\"2017.1\"/>\n" +
                 "            <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
                 "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +

@@ -53,12 +53,17 @@ public class TermsOfServiceConfig {
 
     @NotNull
     public File getConfigFile(@NotNull String filename) {
-        return new File(myConfigDir, filename);
+        return FileUtil.getCanonicalFile(new File(myConfigDir, filename));
     }
 
     @NotNull
     public File getMainConfig() {
-        return getConfigFile(CONFIG_FILE);
+        return FileUtil.getCanonicalFile(getConfigFile(CONFIG_FILE));
+    }
+
+    @NotNull
+    public File getConfigDir() {
+        return FileUtil.getCanonicalFile(myConfigDir);
     }
 
     synchronized void loadSettings() {

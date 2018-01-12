@@ -75,6 +75,12 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
             }
 
             File agreementFile = myConfig.getConfigFile(agreementFileParam);
+
+            if (!FileUtil.isAncestor(myConfig.getConfigDir(), agreementFile, false)) {
+                TermsOfServiceLogger.LOGGER.warn("Agreement file '" + agreementFile + "' is outside of the allowed directory '" + myConfig.getConfigDir() + "', the agreement is ignored.");
+                continue;
+            }
+
             String agreementContent;
 
             if (agreementFile.exists() && agreementFile.isFile()) {
