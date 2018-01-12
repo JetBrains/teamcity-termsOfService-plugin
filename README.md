@@ -27,7 +27,7 @@ If you want any user (except guest) to be aware of a certain agreement, do the f
             <parameters>
               <param name="content-file" value="agreement.html"/>  <!-- Path to the file containing agreement html, relative to the <TeamCity Data Directory>/config/termsOfService/ directory  -->
               <param name="short-name" value="Privacy Policy"/>  <!-- Name of the link to the agreement in footer -->
-              <param name="full-name" value="Privacy Policy for Hosted TeamCity (https://teamcity.jetbrains.com)"/>	<!-- Title of the agreement shown on the agreement page-->
+              <param name="full-name" value="Privacy Policy for TeamCity"/>	<!-- Title of the agreement shown on the agreement page-->
               
               <!-- 
                   Optional parameter. By default all the sessions which were active when the agreement was introduced don't have to accept it. 
@@ -54,7 +54,7 @@ If you want to ask users to agree with a list of consents, add the 'consents' el
             <parameters>
               <param name="content-file" value="agreement.html"/>  
               <param name="short-name" value="Privacy Policy"/>  
-              <param name="full-name" value="Privacy Policy for Hosted TeamCity (https://teamcity.jetbrains.com)"/>	
+              <param name="full-name" value="Privacy Policy for TeamCity"/>	
               <param name="version" value="2017.6"/>  
             </parameters>
             <consents>
@@ -78,7 +78,7 @@ If you want to additionally display a special notice to the guest user, do the f
         <parameters>
             <param name="content-file" value="agreement.html"/>  
             <param name="short-name" value="Privacy Policy"/>  
-            <param name="full-name" value="Privacy Policy for Hosted TeamCity (https://teamcity.jetbrains.com)"/>	
+            <param name="full-name" value="Privacy Policy for TeamCity"/>	
             <param name="version" value="2017.6"/>  
         </parameters>
     </agreement>
