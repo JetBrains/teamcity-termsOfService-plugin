@@ -27,6 +27,13 @@ If you want any user (except guest) to be aware of a certain agreement, do the f
               <param name="content-file" value="agreement.html"/>  <!-- Path to the file containing agreement html, relative to the <TeamCity Data Directory>/config/termsOfService/ directory  -->
               <param name="short-name" value="Privacy Policy"/>  <!-- Name of the link to the agreement in footer -->
               <param name="full-name" value="Privacy Policy for Hosted TeamCity (https://teamcity.jetbrains.com)"/>	<!-- Title of the agreement shown on the agreement page-->
+              
+              <!-- 
+                  Optional parameter. By default all the sessions which were active when the agreement was introduced don't have to accept it. 
+                  This parameter can be used to force all the active sessions to accept the agreement after the specified date.
+              -->
+              <param name="enforcement-date" value="2018-01-13T00:00+0000"/>  
+              
               <param name="version" value="2017.6"/>  <!-- Current version of the agreement. When changed all users will have to accept it again. -->
               <param name="last-updated" value="08 January 2018"/>  <!-- Optional parameter. When defined it will be displayed in a note describing why the user have to accept the agreement again. -->
             </parameters>

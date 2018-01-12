@@ -14,6 +14,7 @@ import javax.annotation.concurrent.ThreadSafe;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -23,6 +24,7 @@ import static java.util.stream.Collectors.toList;
 @ThreadSafe
 public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
     private static final String TEAMCITY_TERMS_OF_SERVICE_ENABLED_PROPERTY = "teamcity.termsOfService.enabled";
+    private static final String ACCEPTED_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
     @NotNull
     private final TermsOfServiceConfig myConfig;
@@ -227,12 +229,27 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
         private final String html;
         private final Map<String, String> params;
         private final List<Consent> consents;
+        @Nullable
+        private final Date enforcementDate;
 
         AgreementImpl(@NotNull String id, @NotNull String html, @NotNull Map<String, String> params, @NotNull List<Consent> consents) {
             this.id = id;
             this.html = html;
             this.params = params;
             this.consents = consents;
+
+            String enforcementDateStr = params.get("enforcement-date");
+            Date parsedEnforcementDate = null;
+            if (enforcementDateStr != null) {
+                String pattern = "yyyy-MM-dd'T'HH:mmZ";
+                try {
+                    parsedEnforcementDate = new SimpleDateFormat(pattern).parse(enforcementDateStr);
+                } catch (ParseException e) {
+                    TermsOfServiceLogger.LOGGER.warnAndDebugDetails("Invalid 'enforcement-date' date format for the agreement '" + id + "', supported format is: " + pattern, e);
+                    parsedEnforcementDate = null;
+                }
+            }
+            this.enforcementDate = parsedEnforcementDate;
         }
 
         @NotNull
@@ -279,6 +296,11 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
         }
 
         @Override
+        public boolean isEnforcedForActiveSessions() {
+            return enforcementDate != null && Dates.isBeforeWithError(enforcementDate, new Date(timeService.now()), 0);
+        }
+
+        @Override
         public boolean isAccepted(@NotNull SUser user) {
             String acceptedVersion = user.getPropertyValue(getAcceptedVersionKey());
             return acceptedVersion != null && VersionComparatorUtil.compare(acceptedVersion, getVersion()) >= 0;
@@ -298,7 +320,7 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
         @Override
         public void accept(@NotNull SUser user, @NotNull HttpServletRequest request) {
             user.setUserProperty(getAcceptedVersionKey(), getVersion());
-            user.setUserProperty(new SimplePropertyKey("teamcity.policy." + id + ".acceptedDate"), new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(timeService.now()));
+            user.setUserProperty(new SimplePropertyKey("teamcity.policy." + id + ".acceptedDate"), new SimpleDateFormat(ACCEPTED_DATE_FORMAT).format(timeService.now()));
             user.setUserProperty(new SimplePropertyKey("teamcity.policy." + id + ".acceptedFromIP"), WebUtil.getRemoteAddress(request));
         }
 
@@ -419,7 +441,7 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
             if (accepted) {
                 if (!user.getBooleanProperty(acceptedProp)){ //don't overwrite if already accepted
                     user.setUserProperty(acceptedProp, "true");
-                    user.setUserProperty(acceptedDateProp, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(timeService.now()));
+                    user.setUserProperty(acceptedDateProp, new SimpleDateFormat(ACCEPTED_DATE_FORMAT).format(timeService.now()));
                     user.setUserProperty(acceptedIpProp, acceptedFromIp);
                 }
             } else {

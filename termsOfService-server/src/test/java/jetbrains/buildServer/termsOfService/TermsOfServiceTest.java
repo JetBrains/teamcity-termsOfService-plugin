@@ -15,6 +15,7 @@ import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.users.SimplePropertyKey;
 import jetbrains.buildServer.users.UserModelEx;
 import jetbrains.buildServer.users.impl.UserEx;
+import jetbrains.buildServer.util.Dates;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.util.TimeService;
@@ -40,6 +41,7 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -226,6 +228,36 @@ public class TermsOfServiceTest extends BaseTestCase {
 
         assertOverviewPageRedirectsToAgreement("hosted_teamcity");
         assertOverviewPageRedirectsToAgreement("hosted_teamcity");//second request must also redirect to the agreement
+    }
+
+    /**
+     * Is a user is using TeamCity while the agreement is configured then the agreement should not be shown to him,
+     * but must be shown for any new sessions.
+     */
+    @Test
+    public void should_support_enforcement_date() throws Exception {
+        login(createUser("user1"));
+        assertOverviewPageAccessible();
+
+        String enforcementDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ").format(Dates.daysAfter(new Date(currentTime), 1));
+
+        writeConfig("<terms-of-service>\n" +
+                "    <agreement id=\"hosted_teamcity\">\n" +
+                "        <parameters>\n" +
+                "            <param name=\"content-file\" value=\"agreement.html\"/>\n" +
+                "            <param name=\"version\" value=\"2017.1\"/>\n" +
+                "            <param name=\"enforcement-date\" value=\"" + enforcementDate + "\"/>\n" +
+                "            <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
+                "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
+                "        </parameters>\n" +
+                "    </agreement>\n" +
+                "</terms-of-service>");
+
+        assertOverviewPageAccessible();
+
+        currentTime = Dates.daysAfter(new Date(currentTime), 1).getTime() + 1;
+
+        assertOverviewPageRedirectsToAgreement("hosted_teamcity");
     }
 
     @Test

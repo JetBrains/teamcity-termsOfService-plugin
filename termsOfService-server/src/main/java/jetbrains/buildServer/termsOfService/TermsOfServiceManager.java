@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,6 +48,14 @@ public interface TermsOfServiceManager {
 
         @NotNull
         List<Consent> getConsents();
+
+        /**
+         * By default just configured agreement is forced only for the new sessions,
+         * while all the currently active sessions don't have to accept it.
+         *
+         * If true then all the users including currently active will have to accept the agreement.
+         */
+        boolean isEnforcedForActiveSessions();
 
         /**
          * Check whether the user have accepted the latest version of the agreement.

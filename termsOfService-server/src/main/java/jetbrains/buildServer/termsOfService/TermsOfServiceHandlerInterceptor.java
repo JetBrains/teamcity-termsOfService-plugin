@@ -15,7 +15,7 @@ import java.util.List;
 public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerInterceptor {
 
     public static final String PROCEED_URL_PARAM = "proceedUrl";
-    private static final String SESSION_DOES_NOT_REQUIRE_PROCESSING_ATTR = "TeamCity_TermsOfService_SessionProcessed";
+    private static final String NO_AGREEMENTS_EXIST_WHEN_SESSION_WAS_CREATED_ATTR = "TeamCity_TermsOfService_NoAgreementsExistWhenSessionWasCreated";
 
     @NotNull
     private final TermsOfServiceManager myManager;
@@ -42,18 +42,18 @@ public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerIntercep
             return true;
         }
 
-        if (session.getAttribute(SESSION_DOES_NOT_REQUIRE_PROCESSING_ATTR) != null) {
-            return true;
-        }
-
         List<TermsOfServiceManager.Agreement> mustAcceptAgreements = myManager.getMustAcceptAgreements(user);
 
         if (mustAcceptAgreements.isEmpty()) {
-            session.setAttribute(SESSION_DOES_NOT_REQUIRE_PROCESSING_ATTR, true);
+            session.setAttribute(NO_AGREEMENTS_EXIST_WHEN_SESSION_WAS_CREATED_ATTR, true);
             return true;
         }
 
         TermsOfServiceManager.Agreement agreement = mustAcceptAgreements.get(0);
+
+        if (session.getAttribute(NO_AGREEMENTS_EXIST_WHEN_SESSION_WAS_CREATED_ATTR) != null && !agreement.isEnforcedForActiveSessions()) {
+            return true;
+        }
 
         if (!path.startsWith(AcceptTermsOfServiceController.PATH)) {
             String entryPoint = AcceptTermsOfServiceController.PATH + "?agreement=" + agreement.getId() + "&" + PROCEED_URL_PARAM + "=" + WebUtil.encode(WebUtil.getRequestUrl(request));
