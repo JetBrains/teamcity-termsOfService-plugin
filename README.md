@@ -1,4 +1,5 @@
-# TeamCity Terms Of Services Plugin
+
+# TeamCity Terms Of Services Plugin [![official JetBrains project](http://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 
 This TeamCity plugin allows displaying an additional license agreement (terms of services, privacy policy) to all the TeamCity server users and requiring users to accept the agreement before they can continue to interact with the service. The plugin can be useful for implementing GDPR requirements for a TeamCity installation.
 
