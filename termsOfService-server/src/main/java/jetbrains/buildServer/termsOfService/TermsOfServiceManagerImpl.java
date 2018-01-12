@@ -33,8 +33,11 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
     @NotNull
     private final TimeService timeService;
 
+    @NotNull
     private final List<Agreement> myAgreements = new ArrayList<>();
+    @NotNull
     private final List<ExternalAgreementLink> externalAgreements = new ArrayList<>();
+    @Nullable
     private volatile GuestNotice myGuestNotice = null;
 
     public TermsOfServiceManagerImpl(@NotNull TermsOfServiceConfig config,
@@ -47,17 +50,28 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
     }
 
     private synchronized void reloadConfig(@NotNull Element config) {
-        TermsOfServiceLogger.LOGGER.info("Loading Terms Of Service configuration from " + myConfig.getMainConfig());
+        TermsOfServiceLogger.LOGGER.debug("Loading configuration from " + myConfig.getMainConfig());
         readAgreements(config);
         readExternalAgreement(config);
         readGuestNotice(config);
+        String msg = "Configuration was loaded from " + myConfig.getMainConfig() + ", ";
+        if (!myAgreements.isEmpty()) {
+            msg += myAgreements.size() + " " + StringUtil.pluralize("agreement", myAgreements.size())+ " loaded";
+        } else {
+            msg += "no agreements were loaded";
+        }
+        if (myGuestNotice != null) {
+            msg += ", guest notice was loaded";
+        }
+        TermsOfServiceLogger.LOGGER.info(msg);
+
     }
 
     private void readAgreements(@NotNull Element config) {
         myAgreements.clear();
         List agreementElements = config.getChildren("agreement");
         if (agreementElements.isEmpty()) {
-            TermsOfServiceLogger.LOGGER.warn("Broken Terms Of Service configuration: no 'agreement' elements found in " + myConfig.getMainConfig());
+            TermsOfServiceLogger.LOGGER.warn("Broken configuration: no 'agreement' elements found in " + myConfig.getMainConfig());
         }
 
         for (Object agreementEl : agreementElements) {
@@ -67,12 +81,12 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
             String agreementFileParam = params.get("content-file");
 
             if (StringUtil.isEmptyOrSpaces(agreementId)) {
-                TermsOfServiceLogger.LOGGER.warn("Broken Terms Of Service configuration: missing agreement id, the agreement is ignored.");
+                TermsOfServiceLogger.LOGGER.warn("Broken configuration: missing agreement id, the agreement is ignored.");
                 continue;
             }
 
             if (StringUtil.isEmptyOrSpaces(agreementFileParam)) {
-                TermsOfServiceLogger.LOGGER.warn("Broken Terms Of Service configuration: missing 'content-file' parameter for agreement id = " + agreementId + ", the agreement is ignored.");
+                TermsOfServiceLogger.LOGGER.warn("Broken configuration: missing 'content-file' parameter for agreement id = '" + agreementId + "', the agreement is ignored.");
                 continue;
             }
 
@@ -89,11 +103,11 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
                 try {
                     agreementContent = FileUtil.readText(agreementFile, "UTF-8");
                 } catch (IOException e) {
-                    TermsOfServiceLogger.LOGGER.warnAndDebugDetails("Error while reading Terms Of Service agreement file from " + agreementFile + " for agreement id = " + agreementId, e);
+                    TermsOfServiceLogger.LOGGER.warnAndDebugDetails("Error while reading agreement file from " + agreementFile + " for agreement id = '" + agreementId + "'", e);
                     continue;
                 }
             } else {
-                TermsOfServiceLogger.LOGGER.warn("Broken Terms Of Service configuration: agreement file '" + agreementFile + "' doesn't exist for agreement id = " + agreementId);
+                TermsOfServiceLogger.LOGGER.warn("Broken configuration: agreement file '" + agreementFile + "' doesn't exist for agreement id = '" + agreementId + "'");
                 continue;
             }
 
@@ -107,12 +121,12 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
                     String text = consentEl.getAttributeValue("text");
 
                     if (StringUtil.isEmptyOrSpaces(id)) {
-                        TermsOfServiceLogger.LOGGER.warn("Broken Terms Of Service configuration: missing consent id, the consent is ignored.");
+                        TermsOfServiceLogger.LOGGER.warn("Broken configuration: missing consent id, the consent is ignored.");
                         continue;
                     }
 
                     if (StringUtil.isEmptyOrSpaces(text)) {
-                        TermsOfServiceLogger.LOGGER.warn("Broken Terms Of Service configuration: missing consent text, the consent is ignored.");
+                        TermsOfServiceLogger.LOGGER.warn("Broken configuration: missing consent text, the consent is ignored.");
                         continue;
                     }
 
@@ -132,12 +146,12 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
             String url = ((Element) agreementEl).getAttributeValue("url");
 
             if (StringUtil.isEmptyOrSpaces(text)) {
-                TermsOfServiceLogger.LOGGER.warn("Broken Terms Of Service configuration: missing external agreement text, the agreement is ignored.");
+                TermsOfServiceLogger.LOGGER.warn("Broken configuration: missing external agreement text, the agreement is ignored.");
                 continue;
             }
 
             if (StringUtil.isEmptyOrSpaces(url)) {
-                TermsOfServiceLogger.LOGGER.warn("Broken Terms Of Service configuration: missing external agreement url, the agreement is ignored.");
+                TermsOfServiceLogger.LOGGER.warn("Broken configuration: missing external agreement url, the agreement is ignored.");
                 continue;
             }
 
@@ -154,12 +168,12 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
             String contentFile = params.get("content-file");
 
             if (StringUtil.isEmptyOrSpaces(text)) {
-                TermsOfServiceLogger.LOGGER.warn("Broken Terms Of Service configuration: missing guest notice text, the guest notice is ignored.");
+                TermsOfServiceLogger.LOGGER.warn("Broken configuration: missing guest notice text, the guest notice is ignored.");
                 return;
             }
 
             if (StringUtil.isEmptyOrSpaces(contentFile)) {
-                TermsOfServiceLogger.LOGGER.warn("Broken Terms Of Service configuration: missing 'content-file' parameter for a guest notice, the guest notice is ignored.");
+                TermsOfServiceLogger.LOGGER.warn("Broken configuration: missing 'content-file' parameter for a guest notice, the guest notice is ignored.");
                 return;
             }
 
@@ -175,7 +189,7 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
                     TermsOfServiceLogger.LOGGER.warnAndDebugDetails("Error while reading guest notice content from " + guestNoticeFile, e);
                 }
             } else {
-                TermsOfServiceLogger.LOGGER.warn("Broken Terms Of Service configuration: guest notice content file '" + guestNoticeFile + "' doesn't exist");
+                TermsOfServiceLogger.LOGGER.warn("Broken configuration: guest notice content file '" + guestNoticeFile + "' doesn't exist");
             }
         }
     }

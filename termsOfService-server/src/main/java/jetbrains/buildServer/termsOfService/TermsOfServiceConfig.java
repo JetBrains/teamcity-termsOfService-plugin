@@ -73,7 +73,7 @@ public class TermsOfServiceConfig {
                 onChangeListener.accept(parsed);
             }
         } catch (IOException | JDOMException e) {
-            TermsOfServiceLogger.LOGGER.warnAndDebugDetails("Error while loading Terms Of Service settings from " + FileUtil.getCanonicalFile(mySettingsFile).getPath(), e);
+            TermsOfServiceLogger.LOGGER.warnAndDebugDetails("Error loading settings from " + FileUtil.getCanonicalFile(mySettingsFile).getPath(), e);
         }
     }
 

@@ -57,7 +57,7 @@ public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerIntercep
 
         if (!path.startsWith(AcceptTermsOfServiceController.PATH)) {
             String entryPoint = AcceptTermsOfServiceController.PATH + "?agreement=" + agreement.getId() + "&" + PROCEED_URL_PARAM + "=" + WebUtil.encode(WebUtil.getRequestUrl(request));
-            TermsOfServiceLogger.LOGGER.debug(String.format("Will redirect to %s. ", entryPoint));
+            TermsOfServiceLogger.LOGGER.debug("Redirecting " + WebUtil.getRequestDump(request) + " to " + entryPoint);
             response.sendRedirect(request.getContextPath() + entryPoint);
             return false;
         }

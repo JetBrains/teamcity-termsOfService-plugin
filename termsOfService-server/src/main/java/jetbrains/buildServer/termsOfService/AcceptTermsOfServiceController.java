@@ -54,7 +54,7 @@ public class AcceptTermsOfServiceController extends BaseController {
         Optional<TermsOfServiceManager.Agreement> agreement = myManager.findAgreement(agreementId);
 
         if (!agreement.isPresent()) {
-            LOGGER.warn("Request for unknown agreement '" + agreementId + "'  detected: " + WebUtil.getRequestDump(request));
+            LOGGER.warn("Request for unknown agreement '" + agreementId + "' detected: " + WebUtil.getRequestDump(request));
             response.setStatus(404);
             return null;
         }
