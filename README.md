@@ -18,7 +18,7 @@ The plugin is configured using the settings file `<TeamCity Data Directory>/conf
 Upon the first plugin installation, the default configuration is created in the "termsOfService" directory. This configuration is disabled and does not change any behavior.
 To activate the settings you should:
 
-* modify the settings.xml file based on your needs (see possible configurations below),
+* modify the settings.xml file based on your needs (see possible configurations below). You can modify [Data Directory](https://confluence.jetbrains.com/display/TCD10/TeamCity+Data+Directory) content in the browser,
 * replace content of the agreement.html and/or guestNotice.html files with your agreements,
 * change values of 'enabled' attributes from 'false' to 'true' in the settings.xml file. 
 
