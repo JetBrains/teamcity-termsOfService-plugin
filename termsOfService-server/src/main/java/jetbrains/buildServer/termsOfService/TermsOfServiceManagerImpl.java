@@ -74,10 +74,12 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
             TermsOfServiceLogger.LOGGER.warn("Broken configuration: no 'agreement' elements found in " + myConfig.getMainConfig());
         }
 
-        for (Object agreementEl : agreementElements) {
-            Element paramsElement = ((Element) agreementEl).getChild("parameters");
+        for (Object agreementElObj : agreementElements) {
+            Element agreementEl = (Element) agreementElObj;
+
+            Element paramsElement = agreementEl.getChild("parameters");
             Map<String, String> params = paramsElement == null ? emptyMap() : XmlUtil.readParameters(paramsElement);
-            String agreementId = ((Element) agreementEl).getAttributeValue("id");
+            String agreementId = agreementEl.getAttributeValue("id");
             String agreementFileParam = params.get("content-file");
 
             if (StringUtil.isEmptyOrSpaces(agreementId)) {
@@ -89,6 +91,12 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
                 TermsOfServiceLogger.LOGGER.warn("Broken configuration: missing 'content-file' parameter for agreement id = '" + agreementId + "', the agreement is ignored.");
                 continue;
             }
+
+            if (isEnabled(agreementEl)) {
+                TermsOfServiceLogger.LOGGER.info("Agreement '" + agreementId + "' is disabled, to enable change 'enabled' attribute value to 'true'");
+                continue;
+            }
+
 
             File agreementFile = myConfig.getConfigFile(agreementFileParam);
 
@@ -162,6 +170,12 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
     private void readGuestNotice(@NotNull Element config) {
         Element guestNoticeEl = config.getChild("guest-notice");
         if (guestNoticeEl != null) {
+
+            if (isEnabled(guestNoticeEl)) {
+                TermsOfServiceLogger.LOGGER.info("Guest Notice is disabled, to enable change 'enabled' attribute value to 'true'");
+                return;
+            }
+
             Element paramsElement = guestNoticeEl.getChild("parameters");
             Map<String, String> params = paramsElement == null ? emptyMap() : XmlUtil.readParameters(paramsElement);
             String text = params.get("text");
@@ -192,6 +206,10 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
                 TermsOfServiceLogger.LOGGER.warn("Broken configuration: guest notice content file '" + guestNoticeFile + "' doesn't exist");
             }
         }
+    }
+
+    private boolean isEnabled(@NotNull Element element) {
+        return element.getAttributeValue("enabled") != null && !Boolean.parseBoolean(element.getAttributeValue("enabled"));
     }
 
     @NotNull

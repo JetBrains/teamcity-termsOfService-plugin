@@ -36,7 +36,7 @@ public class TermsOfServiceGuestNote extends SimplePageExtension {
     @Override
     public boolean isAvailable(@NotNull HttpServletRequest request) {
         SUser user = SessionUser.getUser(request);
-        return user != null && userModel.isGuestUser(user);
+        return user != null && userModel.isGuestUser(user) && termsOfServiceManager.getGuestNotice().isPresent();
     }
 }
 

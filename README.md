@@ -23,7 +23,9 @@ If you want any user (except guest) to be aware of a certain agreement, do the f
 * Add the following configuration to the `<TeamCity Data Directory>/config/termsOfService/settings.xml` file
 ```xml
     <terms-of-service>
-        <agreement id="privacy_policy"> <!-- Any identifier of the agreement, it's used when persisting the fact of the agreement acceptance by a user-->
+        <!-- id: any identifier of the agreement, it's used when persisting the fact of the agreement acceptance by a user-->
+        <!-- enabled: optional attribute, can be used to disable the agreement-->
+        <agreement id="privacy_policy" enabled="true"> 
             <parameters>
               <param name="content-file" value="agreement.html"/>  <!-- Path to the file containing agreement html, relative to the <TeamCity Data Directory>/config/termsOfService/ directory  -->
               <param name="short-name" value="Privacy Policy"/>  <!-- Name of the link to the agreement in footer -->
@@ -82,7 +84,8 @@ If you want to additionally display a special notice to the guest user, do the f
             <param name="version" value="2017.6"/>  
         </parameters>
     </agreement>
-    <guest-notice>
+    <!-- enabled: optional attribute, can be used to disable the notice-->
+    <guest-notice enabled="true">
         <parameters>
             <param name="content-file" value="guestNotice.html"/> <!-- Path to the file containing notice html, relative to the <TeamCity Data Directory>/config/termsOfService/ directory  -->
             <param name="text" value="A privacy reminder from JetBrains"/>  <!-- Short text to be shown in the notice-->

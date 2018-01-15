@@ -15,10 +15,7 @@ import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.users.SimplePropertyKey;
 import jetbrains.buildServer.users.UserModelEx;
 import jetbrains.buildServer.users.impl.UserEx;
-import jetbrains.buildServer.util.Dates;
-import jetbrains.buildServer.util.EventDispatcher;
-import jetbrains.buildServer.util.FileUtil;
-import jetbrains.buildServer.util.TimeService;
+import jetbrains.buildServer.util.*;
 import jetbrains.buildServer.web.openapi.PagePlace;
 import jetbrains.buildServer.web.openapi.PagePlaces;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
@@ -83,6 +80,7 @@ public class TermsOfServiceTest extends BaseTestCase {
     @BeforeMethod
     public void setUp() throws Exception {
         super.setUp();
+        enableDebug();
         session = new MockHttpSession();
         setInternalProperty("teamcity.http.auth.treat.all.clients.as.browsers", "true");
         securityContext = new SecurityContextImpl();
@@ -451,9 +449,63 @@ public class TermsOfServiceTest extends BaseTestCase {
         then(guestNotice.getCookieDurationDays()).isEqualTo(10);
     }
 
-    private void writeConfig(String s) {
+    @Test
+    public void ability_to_disable_agreement() throws Exception {
+        writeConfig("<terms-of-service>\n" +
+                "    <agreement id=\"hosted_teamcity\" enabled=\"false\">\n" +
+                "        <parameters>\n" +
+                "          \t<param name=\"content-file\" value=\"agreement.html\"/>\n" +
+                "          \t<param name=\"version\" value=\"2017.1\"/>\n" +
+                "            <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
+                "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
+                "        </parameters>\n" +
+                "    </agreement>\n" +
+                "</terms-of-service>");
+
+        login(createUser("user1"));
+        assertAgreementNotShown("hosted_teamcity");
+
+        replaceInSettingsFile("enabled=\"false\"", "enabled=\"true\"");
+
+        relogin();
+        assertOverviewPageRedirectsToAgreement("hosted_teamcity");
+    }
+
+    @Test
+    public void ability_to_disable_guest_notice() throws Exception {
+        File guestNoticeFile = new File(myAgreementFile.getParent(), "guestNotice.html");
+        FileUtil.createIfDoesntExist(guestNoticeFile);
+        FileUtil.writeFileAndReportErrors(guestNoticeFile, "Guest Notice");
+
+        writeConfig("<terms-of-service>\n" +
+                "    <guest-notice enabled=\"false\">\n" +
+                "        <parameters>\n" +
+                "           \t<param name=\"content-file\" value=\"guestNotice.html\"/>\n" +
+                "            <param name=\"text\" value=\"A privacy reminder from JetBrains\"/>\n" +
+                "            <param name=\"accepted-cookie-name\" value=\"privacy_policy_accepted\"/>\n" +
+                "            <param name=\"accepted-cookie-max-age-days\" value=\"10\"/>\n" +
+                "        </parameters>\n" +
+                "    </guest-notice>\n" +
+                "</terms-of-service>");
+
+        login(userModel.getGuestUser());
+        newRequest(HttpMethod.GET, "/");
+        then(guestNote.isAvailable(request)).isFalse();
+
+        replaceInSettingsFile("enabled=\"false\"", "enabled=\"true\"");
+        relogin();
+        newRequest(HttpMethod.GET, "/");
+        then(guestNote.isAvailable(request)).isTrue();
+    }
+
+    private void replaceInSettingsFile(@NotNull String replace, @NotNull String replacement) throws IOException {
+        String content = new String(FileUtil.loadFileText(configFile, "UTF-8"));
+        writeConfig(content.replace(replace, replacement));
+    }
+
+    private void writeConfig(String s) throws IOException {
         FileUtil.createIfDoesntExist(configFile);
-        FileUtil.writeFile(configFile, s);
+        FileUtil.writeFileAndReportErrors(configFile, s);
         config.loadSettings();
     }
 
