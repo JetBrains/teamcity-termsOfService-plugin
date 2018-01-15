@@ -314,7 +314,8 @@ public class TermsOfServiceTest extends BaseTestCase {
                 "        <parameters>\n" +
                 "           <param name=\"content-file\" value=\"agreement.html\"/>\n" +
                 "           <param name=\"version\" value=\"2017.2\"/>\n" +
-                "           <param name=\"last-updated\" value=\"08 January 2018\"/>\n" +
+                "           <param name=\"new-user-note\" value=\"You must accept the agreement\"/>\n" +
+                "           <param name=\"new-version-note\" value=\"We've update the agreement on 08 January 2018. Confirm?\"/>\n" +
                 "           <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
                 "           <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
                 "        </parameters>\n" +
@@ -325,7 +326,8 @@ public class TermsOfServiceTest extends BaseTestCase {
 
         model = GET_Accept_Agreement_Page("hosted_teamcity");
         then(model.get("displayReason")).isEqualTo(AcceptTermsOfServiceController.DisplayReason.NEW_VERSION);
-        then(((TermsOfServiceManager.Agreement) model.get("agreement")).getLastUpdated()).isEqualTo("08 January 2018");
+        then(((TermsOfServiceManager.Agreement) model.get("agreement")).getNewUserNote()).isEqualTo("You must accept the agreement");
+        then(((TermsOfServiceManager.Agreement) model.get("agreement")).getNewVersionNote()).isEqualTo("We've update the agreement on 08 January 2018. Confirm?");
 
         POST_Accept_Agreement_Page("hosted_teamcity");
         assertOverviewPageAccessible();

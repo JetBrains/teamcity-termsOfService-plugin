@@ -28,12 +28,10 @@
           <div>
             <c:choose>
               <c:when test="${displayReason eq newVersionDisplayMode}">
-                  We've updated the <c:out value="${agreement.shortName}"/> agreement<c:if test="${agreement.lastUpdated != null}"> on ${agreement.lastUpdated}</c:if>.
-                  Review the terms and click "I agree" when you're ready to continue using TeamCity.
+                <bs:out value="${agreement.newVersionNote}"/>
               </c:when>
               <c:when test="${displayReason eq notAcceptedDisplayMode}">
-                  You have to accept the <c:out value="${agreement.shortName}"/> agreement before you can continue to use TeamCity.
-                  Review the terms and click "I agree" when you're ready to proceed.
+                <bs:out value="${agreement.newUserNote}"/>
               </c:when>
             </c:choose>
           </div>

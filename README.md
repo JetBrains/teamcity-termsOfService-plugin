@@ -45,7 +45,14 @@ If you want any user (except guest) to be aware of a certain agreement, do the f
               <param name="enforcement-date" value="2018-01-13T00:00+0000"/>  
               
               <param name="version" value="2017.6"/>  <!-- Current version of the agreement. When changed all users will have to accept it again. -->
-              <param name="last-updated" value="08 January 2018"/>  <!-- Optional parameter. When defined it will be displayed in a note describing why the user have to accept the agreement again. -->
+              
+              <!-- Optional parameter. When defined it will be displayed in a note describing why the user have to accept the agreement again. -->
+              <param name="new-user-note" value="You have to accept the Privacy Policy agreement before you can continue to use TeamCity.
+                                                    Review the terms and click 'I agree' when you're ready to proceed."/>  
+              
+              <!-- Optional parameter. When defined it will be displayed in a note describing why the user have to accept the agreement again. -->
+              <param name="new-version-note" value="We've updated the Privacy Policy agreement.
+                                                    Review the terms and click 'I agree' when you're ready to continue using TeamCity."/>  
             </parameters>
         </agreement>
     </terms-of-service>

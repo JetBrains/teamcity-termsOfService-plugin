@@ -359,10 +359,20 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
             return user.getPropertyValue(getAcceptedVersionKey()) != null;
         }
 
-        @Nullable
+        @NotNull
         @Override
-        public String getLastUpdated() {
-            return params.get("last-updated");
+        public String getNewUserNote() {
+            return StringUtil.notNullize(params.get("new-user-note"),
+                    "You have to accept the " + getShortName() + " agreement before you can continue to use TeamCity." +
+                    "Review the terms and click \"I agree\" when you're ready to proceed.");
+        }
+
+        @NotNull
+        @Override
+        public String getNewVersionNote() {
+            return StringUtil.notNullize(params.get("new-version-note"),
+                    "We've updated the " + getShortName() + " agreement." +
+                    "Review the terms and click \"I agree\" when you're ready to continue using TeamCity.");
         }
 
         @Override
