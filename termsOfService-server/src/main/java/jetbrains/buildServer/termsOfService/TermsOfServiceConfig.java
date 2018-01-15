@@ -40,6 +40,7 @@ public class TermsOfServiceConfig {
         myEvents.addListener(new BuildServerAdapter() {
             @Override
             public void serverStartup() {
+                extractDefaultConfig();
                 loadSettings();
                 filesWatcher.start();
             }
@@ -64,6 +65,13 @@ public class TermsOfServiceConfig {
     @NotNull
     public File getConfigDir() {
         return FileUtil.getCanonicalFile(myConfigDir);
+    }
+
+    private synchronized void extractDefaultConfig() {
+        FileUtil.createParentDirs(mySettingsFile);
+        FileUtil.copyResourceWithDist(getClass(), "/configDist/" + mySettingsFile.getName(), new File(myConfigDir, mySettingsFile.getName()));
+        FileUtil.copyResourceWithDist(getClass(), "/configDist/agreement.html", new File(myConfigDir, "agreement.html"));
+        FileUtil.copyResourceWithDist(getClass(), "/configDist/guestNotice.html", new File(myConfigDir, "guestNotice.html"));
     }
 
     synchronized void loadSettings() {

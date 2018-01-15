@@ -1,0 +1,37 @@
+<terms-of-service>
+
+    <!-- id: any identifier of the agreement, it's used when persisting the fact that the agreement was accepted by a user-->
+    <!-- enabled: optional attribute, can be used to disable the agreement-->
+    <agreement id="privacy_policy" enabled="false">
+        <parameters>
+            <!-- Path to the file containing agreement html, relative to the <TeamCity Data Directory>/config/termsOfService/ directory  -->
+            <param name="content-file" value="agreement.html"/>
+
+            <!-- Name of the link to the agreement in footer -->
+            <param name="short-name" value="Privacy Policy"/>
+
+            <!-- Title of the agreement shown on the agreement page-->
+            <param name="full-name" value="Privacy Policy for TeamCity"/>
+
+            <!-- Current version of the agreement. When changed all users will have to accept it again. -->
+            <param name="version" value="2018.1"/>
+        </parameters>
+    </agreement>
+
+    <!-- enabled: optional attribute, can be used to disable the notice-->
+    <guest-notice enabled="false">
+        <parameters>
+            <!-- Path to the file containing notice html, relative to the <TeamCity Data Directory>/config/termsOfService/ directory  -->
+            <param name="content-file" value="guestNotice.html"/>
+
+            <!-- Short text to be shown in the notice-->
+            <param name="text" value="A privacy reminder"/>
+
+            <!-- The name of the cookie where the fact of acceptance is saved -->
+            <param name="accepted-cookie-name" value="guest-notice-accepted"/>
+
+            <!-- The cookie's expiration interval. After the specified number of days the user will be asked to confirm the notice again. -->
+            <param name="accepted-cookie-max-age-days" value="30"/>
+        </parameters>
+    </guest-notice>
+</terms-of-service>

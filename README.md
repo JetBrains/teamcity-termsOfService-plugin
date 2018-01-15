@@ -13,10 +13,17 @@ The plugin is compatible with TeamCity 2017.1 and later.
 * [Install the plugin](https://confluence.jetbrains.com/display/TCDL/Installing+Additional+Plugins)
 
 # Configuration
-The plugin is configured using the settings file `<TeamCity Data Directory>/config/termsOfService/settings.xml`. Until a valid file is found in the location, the plugin does not change any behavior. The file is automatically reloaded while the server is running. In case the file is invalid, teamcity-server.log gets related warnings of the "TermsOfService" category.
-Upon the first plugin installation, the "termsOfService" directory and a file in it need to be created manually.
+The plugin is configured using the settings file `<TeamCity Data Directory>/config/termsOfService/settings.xml`. The file is automatically reloaded while the server is running. In case the file is invalid, teamcity-server.log gets related warnings of the "TermsOfService" category.
 
-## Force all users except guest to accept the agreement 
+Upon the first plugin installation, the default configuration is created in the "termsOfService" directory. This configuration is disabled and does not change any behavior.
+To activate the settings you should:
+
+* modify the settings.xml file based on your needs (see possible configurations below),
+* replace content of the agreement.html and/or guestNotice.html files with your agreements,
+* change values of 'enabled' attributes from 'false' to 'true' in the settings.xml file. 
+
+
+##### Force all users except guest to accept the agreement 
 
 If you want any user (except guest) to be aware of a certain agreement, do the following:
 
@@ -45,7 +52,7 @@ If you want any user (except guest) to be aware of a certain agreement, do the f
 ```
 * Place the agreement HTML in the `<TeamCity Data Directory>/config/termsOfService/agreement.html` file 
 
-## Show set of consents for users to agree/disagree 
+##### Show set of consents for users to agree/disagree 
 
 If you want to ask users to agree with a list of consents, add the 'consents' elements to the 'agreement' element:
 
@@ -70,20 +77,12 @@ If you want to ask users to agree with a list of consents, add the 'consents' el
 * With such configuration a user will be asked to agree with two optional consents on the agreement page. 
 * A special tab will also be shown to the user in the 'My Settings & Tools' area. On this tab users can review and modify the list of accepted consents.
 
-## Show special notice to guest user
+##### Show special notice to guest user
 
 If you want to additionally display a special notice to the guest user, do the following:
 * Add the following configuration to the `<TeamCity Data Directory>/config/termsOfService/settings.xml` file
 ```xml
 <terms-of-service>
-    <agreement id="privacy_policy"> 
-        <parameters>
-            <param name="content-file" value="agreement.html"/>  
-            <param name="short-name" value="Privacy Policy"/>  
-            <param name="full-name" value="Privacy Policy for TeamCity"/>	
-            <param name="version" value="2017.6"/>  
-        </parameters>
-    </agreement>
     <!-- enabled: optional attribute, can be used to disable the notice-->
     <guest-notice enabled="true">
         <parameters>
@@ -95,7 +94,6 @@ If you want to additionally display a special notice to the guest user, do the f
     </guest-notice>
 </terms-of-service>
 ```
-* Place the agreement in the `<TeamCity Data Directory>/config/termsOfService/agreement.html` file 
 * Place the guest notice in the `<TeamCity Data Directory>/config/termsOfService/guestNotice.html` file 
 
 

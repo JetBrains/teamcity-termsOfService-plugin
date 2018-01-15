@@ -75,6 +75,10 @@ public class TermsOfServiceTest extends BaseTestCase {
     private TermsOfServiceUserProfileExtension userConsentsExtension;
     private long currentTime;
     private ServerPaths serverPaths;
+    private EventDispatcher<BuildServerListener> events;
+    private FileWatcherFactory fileWatcherFactory;
+    private PluginDescriptor pluginDescriptor;
+    private PagePlaces pagePlaces;
 
     @Override
     @BeforeMethod
@@ -84,7 +88,6 @@ public class TermsOfServiceTest extends BaseTestCase {
         session = new MockHttpSession();
         setInternalProperty("teamcity.http.auth.treat.all.clients.as.browsers", "true");
         securityContext = new SecurityContextImpl();
-        EventDispatcher<BuildServerListener> events = ServerSideEventDispatcher.create(securityContext, BuildServerListener.class);
 
         timeService = Mockito.mock(TimeService.class);
         currentTime = System.currentTimeMillis();
@@ -97,17 +100,22 @@ public class TermsOfServiceTest extends BaseTestCase {
         when(userModel.isGuestUser(ArgumentMatchers.eq(guest))).thenReturn(true);
         when(userModel.isGuestUser(AdditionalMatchers.not(ArgumentMatchers.eq(guest)))).thenReturn(false);
 
-        PluginDescriptor pluginDescriptor = Mockito.mock(PluginDescriptor.class);
-        PagePlaces pagePlaces = Mockito.mock(PagePlaces.class);
+        pluginDescriptor = Mockito.mock(PluginDescriptor.class);
+        pagePlaces = Mockito.mock(PagePlaces.class);
         when(pagePlaces.getPlaceById(any())).thenReturn(Mockito.mock(PagePlace.class));
 
         serverPaths = new ServerPaths(createTempDir());
-        FileWatcherFactory fileWatcherFactory = new FileWatcherFactory(serverPaths, new CriticalErrorsImpl(serverPaths), events);
         File termsOfServiceDir = new File(serverPaths.getConfigDir(), "termsOfService");
         configFile = new File(termsOfServiceDir, "settings.xml");
         myAgreementFile = new File(termsOfServiceDir, "agreement.html");
         FileUtil.createIfDoesntExist(myAgreementFile);
         FileUtil.writeFileAndReportErrors(myAgreementFile, "Agreement");
+        recreateServer();
+    }
+
+    private void recreateServer() {
+        events = ServerSideEventDispatcher.create(securityContext, BuildServerListener.class);
+        fileWatcherFactory = new FileWatcherFactory(serverPaths, new CriticalErrorsImpl(serverPaths), events);
         config = new TermsOfServiceConfig(events, serverPaths, fileWatcherFactory);
         WebControllerManager webControllerManager = Mockito.mock(WebControllerManager.class);
         termsOfServiceManager = new TermsOfServiceManagerImpl(config, userModel, timeService);
@@ -121,7 +129,29 @@ public class TermsOfServiceTest extends BaseTestCase {
     }
 
     @Test
+    public void should_copy_dist_configs_on_startup() throws Exception {
+        File agreementFile = new File(configFile.getParent(), "agreement.html");
+        File guestNoticeFile = new File(configFile.getParent(), "guestNotice.html");
+
+        assertTrue(configFile.exists());
+        assertTrue(agreementFile.exists());
+        assertTrue(guestNoticeFile.exists());
+
+        //should not overwrite modified configs
+        FileUtil.writeFileAndReportErrors(configFile, "<terms-of-service></terms-of-service>");
+        FileUtil.writeFileAndReportErrors(agreementFile, "modifiedAgreement");
+        FileUtil.writeFileAndReportErrors(guestNoticeFile, "modifiedGuestNotice");
+
+        recreateServer();
+
+        then(configFile).hasContent("<terms-of-service></terms-of-service>");
+        then(agreementFile).hasContent("modifiedAgreement");
+        then(guestNoticeFile).hasContent("modifiedGuestNotice");
+    }
+
+    @Test
     public void missing_settings_file() throws Exception {
+        FileUtil.delete(configFile);
         assertFalse(configFile.exists());
 
         login(createUser("user1"));
