@@ -29,7 +29,7 @@ public class TermsOfServicesLink extends SimplePageExtension {
 
         SUser user = SessionUser.getUser(request);
         if (user != null) {
-            model.put("agreements", termsOfServiceManager.getAgreements());
+            model.put("agreements", termsOfServiceManager.getAgreements(user));
             model.put("externalAgreements", termsOfServiceManager.getExternalAgreements());
         }
     }

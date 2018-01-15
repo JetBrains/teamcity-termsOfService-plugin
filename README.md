@@ -52,6 +52,25 @@ If you want any user (except guest) to be aware of a certain agreement, do the f
 ```
 * Place the agreement HTML in the `<TeamCity Data Directory>/config/termsOfService/agreement.html` file 
 
+##### Test the agreement - show it to a single user only 
+
+If you want check how the agreement works you can enable it for the single user only:
+
+* Add 'user-filter' attribute to the 'agreement' element:
+```xml
+    <terms-of-service>
+        <agreement id="privacy_policy" enabled="true" user-filter="username:admin"> 
+            <parameters>
+              <param name="content-file" value="agreement.html"/> 
+              <param name="short-name" value="Privacy Policy"/>  
+              <param name="full-name" value="Privacy Policy for TeamCity"/>	
+              <param name="version" value="2017.6"/>  
+            </parameters>
+        </agreement>
+    </terms-of-service>
+```
+* In the specified configuration the agreement will be shown to the 'admin' user only.
+
 ##### Show set of consents for users to agree/disagree 
 
 If you want to ask users to agree with a list of consents, add the 'consents' elements to the 'agreement' element:

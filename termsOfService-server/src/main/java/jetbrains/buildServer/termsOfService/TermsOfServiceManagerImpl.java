@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Predicate;
 
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
@@ -34,7 +35,7 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
     private final TimeService timeService;
 
     @NotNull
-    private final List<Agreement> myAgreements = new ArrayList<>();
+    private final List<AgreementImpl> myAgreements = new ArrayList<>();
     @NotNull
     private final List<ExternalAgreementLink> externalAgreements = new ArrayList<>();
     @Nullable
@@ -121,7 +122,7 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
 
 
             List<Consent> consents = new ArrayList<>();
-            Element consentsEl = ((Element) agreementEl).getChild("consents");
+            Element consentsEl = agreementEl.getChild("consents");
             if (consentsEl != null) {
                 for (Object consent : consentsEl.getChildren("consent")) {
                     Element consentEl = ((Element) consent);
@@ -143,7 +144,18 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
                 }
             }
 
-            myAgreements.add(new AgreementImpl(agreementId, agreementContent, params, consents));
+            Predicate<SUser> userPredicate = user -> true;
+            String usersFilter = agreementEl.getAttributeValue("user-filter");
+            if (usersFilter != null) {
+                if (!usersFilter.startsWith("username:")) {
+                    TermsOfServiceLogger.LOGGER.warn("Broken configuration: unsupported user filter '" + usersFilter + "'. " +
+                            "Currently only username filters are supported, for example 'username:admin'.");
+                } else {
+                    userPredicate = user -> user.getUsername().equals(usersFilter.substring("username:".length()));
+                }
+            }
+
+            myAgreements.add(new AgreementImpl(agreementId, agreementContent, params, consents, userPredicate));
         }
     }
 
@@ -223,18 +235,19 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
             return Collections.emptyList();
         }
 
-        return getAgreements().stream().filter(a -> !a.isAccepted(user)).collect(toList());
+        return getAgreements(user).stream().filter(a -> !a.isAccepted(user)).collect(toList());
     }
 
     @NotNull
-    public synchronized List<Agreement> getAgreements() {
-        return new ArrayList<>(myAgreements);
+    public synchronized List<Agreement> getAgreements(@NotNull SUser user) {
+        return myAgreements.stream().filter(a -> a.userPredicate.test(user)).collect(toList());
     }
 
     @NotNull
     @Override
     public synchronized Optional<Agreement> findAgreement(@NotNull String id) {
-        return myAgreements.stream().filter(a -> a.getId().equals(id)).findFirst();
+        Optional<AgreementImpl> found = myAgreements.stream().filter(a -> a.getId().equals(id)).findFirst();
+        return Optional.ofNullable(found.orElse(null));
     }
 
     @NotNull
@@ -263,12 +276,15 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
         private final List<Consent> consents;
         @Nullable
         private final Date enforcementDate;
+        @NotNull
+        private final Predicate<SUser> userPredicate;
 
-        AgreementImpl(@NotNull String id, @NotNull String html, @NotNull Map<String, String> params, @NotNull List<Consent> consents) {
+        AgreementImpl(@NotNull String id, @NotNull String html, @NotNull Map<String, String> params, @NotNull List<Consent> consents, @NotNull Predicate<SUser> userPredicate) {
             this.id = id;
             this.html = html;
             this.params = params;
             this.consents = consents;
+            this.userPredicate = userPredicate;
 
             String enforcementDateStr = params.get("enforcement-date");
             Date parsedEnforcementDate = null;

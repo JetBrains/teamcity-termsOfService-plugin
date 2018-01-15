@@ -15,7 +15,7 @@ public interface TermsOfServiceManager {
     List<Agreement> getMustAcceptAgreements(@NotNull SUser user);
 
     @NotNull
-    List<Agreement> getAgreements();
+    List<Agreement> getAgreements(@NotNull SUser user);
 
     @NotNull
     Optional<Agreement> findAgreement(@NotNull String id);

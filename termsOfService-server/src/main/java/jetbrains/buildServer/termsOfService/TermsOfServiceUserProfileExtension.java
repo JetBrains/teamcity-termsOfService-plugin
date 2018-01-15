@@ -21,7 +21,7 @@ public class TermsOfServiceUserProfileExtension extends BaseFormXmlController {
     public static final String PATH = "/userProfileTermsOfService.html";
 
     private final TermsOfServiceManager termsOfServiceManager;
-    private PluginDescriptor descriptor;
+    private final PluginDescriptor descriptor;
 
     public TermsOfServiceUserProfileExtension(@NotNull TermsOfServiceManager manager,
                                               @NotNull PagePlaces pagePlaces,
@@ -33,16 +33,23 @@ public class TermsOfServiceUserProfileExtension extends BaseFormXmlController {
 
         SimpleCustomTab userProfileTab = new SimpleCustomTab(pagePlaces) {
 
+            private final ThreadLocal<String> tabTitle = new ThreadLocal<>();
+
             @NotNull
             @Override
             public String getTabTitle() {
-                TermsOfServiceManager.Agreement agreementWithConsents = getAgreementWithConsents();
-                return agreementWithConsents != null ? agreementWithConsents.getShortName() : "Privacy";
+                String title = tabTitle.get();
+                return title != null ? title : "Privacy";
             }
 
             @Override
             public boolean isAvailable(@NotNull HttpServletRequest request) {
-                return getAgreementWithConsents() != null;
+                TermsOfServiceManager.Agreement agreement = getAgreementWithConsents(SessionUser.getUser(request));
+                if (agreement != null) {
+                    tabTitle.set(agreement.getShortName());
+                    return true;
+                }
+                return false;
             }
         };
 
@@ -97,7 +104,7 @@ public class TermsOfServiceUserProfileExtension extends BaseFormXmlController {
 
     @Nullable
     private Form getOrCreateBean(@NotNull HttpServletRequest request) {
-        TermsOfServiceManager.Agreement agreement = getAgreementWithConsents();
+        TermsOfServiceManager.Agreement agreement = getAgreementWithConsents(SessionUser.getUser(request));
         if (agreement == null) {
             return null;
         }
@@ -109,8 +116,8 @@ public class TermsOfServiceUserProfileExtension extends BaseFormXmlController {
     }
 
     @Nullable
-    private TermsOfServiceManager.Agreement getAgreementWithConsents() {
-        List<TermsOfServiceManager.Agreement> agreements = termsOfServiceManager.getAgreements();
+    private TermsOfServiceManager.Agreement getAgreementWithConsents(@NotNull SUser user) {
+        List<TermsOfServiceManager.Agreement> agreements = termsOfServiceManager.getAgreements(user);
         if (agreements.isEmpty()) {
             return null;
         }

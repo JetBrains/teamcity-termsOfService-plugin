@@ -220,7 +220,7 @@ public class TermsOfServiceTest extends BaseTestCase {
 
         POST_Accept_Agreement_Page("hosted_teamcity");
         then(termsOfServiceManager.getMustAcceptAgreements(user)).hasSize(0);
-        then(termsOfServiceManager.getAgreements()).extracting(a -> a.isAccepted(user)).containsOnly(true);
+        then(termsOfServiceManager.getAgreements(user)).extracting(a -> a.isAccepted(user)).containsOnly(true);
         assertAgreementUserProperties("hosted_teamcity", "2017.1", request.getRemoteAddr(), timeService.now());
 
         assertOverviewPageAccessible();
@@ -403,6 +403,30 @@ public class TermsOfServiceTest extends BaseTestCase {
         //open profile page again
         form = GET_User_Consents_Page();
         then(form.getConsentStates()).containsOnly(entry("analytics", true), entry("marketing", false), entry("newsletter", false));
+    }
+
+    @Test
+    public void should_allow_to_show_agreement_to_users_with_certain_username() throws Exception {
+        writeConfig("<terms-of-service>\n" +
+                "    <agreement id=\"privacy_policy\" user-filter=\"username:user1\">\n" +
+                "        <parameters>\n" +
+                "            <param name=\"content-file\" value=\"agreement.html\"/>\n" +
+                "            <param name=\"version\" value=\"2017.1\"/>\n" +
+                "            <param name=\"short-name\" value=\"Terms of Service\"/>\n" +
+                "            <param name=\"full-name\" value=\"Terms of Service for Hosted TeamCity (teamcity.jetbrains.com)\"/>\n" +
+                "        </parameters>\n" +
+                "    </agreement>\n" +
+                "</terms-of-service>");
+
+        login(createUser("user1"));
+        assertOverviewPageRedirectsToAgreement("privacy_policy");
+        then((List<TermsOfServiceManager.Agreement>) linksExtension().get("agreements"))
+                .extracting("link")
+                .containsOnly("/viewTermsOfServices.html?agreement=privacy_policy");
+
+        login(createUser("user2"));
+        assertOverviewPageAccessible();
+        then((List<TermsOfServiceManager.Agreement>) linksExtension().get("agreements")).isEmpty();
     }
 
     @Test
