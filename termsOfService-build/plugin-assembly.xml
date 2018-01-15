@@ -19,6 +19,7 @@
        </includes> 
        <binaries>
            <outputDirectory>server</outputDirectory>
+           <outputFileNameMapping>termsOfService-server.jar</outputFileNameMapping>
            <unpack>false</unpack>
            <dependencySets>
                <dependencySet>
