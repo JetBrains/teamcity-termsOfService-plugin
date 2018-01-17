@@ -24,7 +24,7 @@
     <bs:_loginPageDecoration id="agreementPage" title="${name}">
     <div class="agreementPage">
       <div class="agreement">
-        <div class="description">
+        <div class="agreementDescription">
           <div>
             <c:choose>
               <c:when test="${displayReason eq newVersionDisplayMode}">
