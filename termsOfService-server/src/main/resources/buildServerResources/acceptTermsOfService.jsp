@@ -39,7 +39,7 @@
         ${agreement.html}
       </div>
       <div class="agreementForm clearfix">
-        <form action="${pageUrl}" method="post" onsubmit="if (!this.accept.checked) { alert('Please accept the ${name}'); return false; };">
+        <form action="${pageUrl}" method="post">
           <div class="consentBlock">
             You are logged in as '<c:out value="${currentUser.descriptiveName}"/>'<c:if test="${fn:length(currentUser.email) > 0}"> (<c:out value="${currentUser.email}"/>)</c:if>.
             Please accept the agreement to proceed.
