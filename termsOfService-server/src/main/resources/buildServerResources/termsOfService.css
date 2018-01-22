@@ -25,6 +25,7 @@
 
 .licenseAgreementLink {
     margin-left: 1em;
+    white-space: nowrap;
 }
 
 #pageContent .agreement p + h1 {
