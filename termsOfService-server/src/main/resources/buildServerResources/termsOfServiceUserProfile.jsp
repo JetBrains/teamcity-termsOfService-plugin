@@ -24,7 +24,7 @@
         <div class="settingsBlockContent">
             <c:forEach var="consent" items="${form.agreement.consents}">
                 <div class="general-property">
-                    <forms:checkbox name="${consent.id}" checked="${form.consentStates[consent.id]}"/><label for="${consent.id}" class="rightLabel">${consent.text}</label>
+                    <forms:checkbox name="${consent.id}" checked="${form.consentStates[consent.id]}"/><label for="${consent.id}" class="rightLabel">${consent.html}</label>
                 </div>
             </c:forEach>
         </div>

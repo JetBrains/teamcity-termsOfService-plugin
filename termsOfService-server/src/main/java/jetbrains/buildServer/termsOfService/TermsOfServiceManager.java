@@ -99,7 +99,7 @@ public interface TermsOfServiceManager {
         boolean isCheckedByDefault();
 
         @NotNull
-        String getText();
+        String getHtml();
 
         boolean isAccepted(@NotNull SUser user);
 

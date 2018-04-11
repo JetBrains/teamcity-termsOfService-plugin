@@ -335,6 +335,10 @@ public class TermsOfServiceTest extends BaseTestCase {
 
     @Test
     public void should_support_configurable_list_of_consents() throws Exception {
+        File marketingConsentFile = new File(myAgreementFile.getParent(), "marketingConsent.html");
+        FileUtil.createIfDoesntExist(marketingConsentFile);
+        FileUtil.writeFileAndReportErrors(marketingConsentFile, "Allow marketing");
+
         writeConfig("<terms-of-service>\n" +
                 "    <agreement id=\"hosted_teamcity\">\n" +
                 "        <parameters>\n" +
@@ -345,7 +349,7 @@ public class TermsOfServiceTest extends BaseTestCase {
                 "        </parameters>\n" +
                 "        <consents>\n" +
                 "          \t<consent id=\"analytics\" text=\"Allow analytics\" default=\"true\"/>\n" +
-                "          \t<consent id=\"marketing\" text=\"Allow marketing\" default=\"false\"/>\n" +
+                "          \t<consent id=\"marketing\" file=\"marketingConsent.html\" default=\"false\"/>\n" +
                 "        </consents>\n" +
                 "    </agreement>\n" +
                 "</terms-of-service>");
@@ -356,6 +360,7 @@ public class TermsOfServiceTest extends BaseTestCase {
 
         Map<String, Object> model = GET_Accept_Agreement_Page("hosted_teamcity");
         then(((TermsOfServiceManager.Agreement) model.get("agreement")).getConsents()).extracting(TermsOfServiceManager.Consent::getId).contains("analytics", "marketing");
+        then(((TermsOfServiceManager.Agreement) model.get("agreement")).getConsents()).extracting(TermsOfServiceManager.Consent::getHtml).contains("Allow analytics", "Allow marketing");
 
         POST_Accept_Agreement_Page("hosted_teamcity", "analytics");
         then(termsOfServiceManager.getMustAcceptAgreements(user)).hasSize(0);

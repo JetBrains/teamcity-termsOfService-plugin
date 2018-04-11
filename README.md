@@ -105,7 +105,12 @@ If you want to ask users to agree with a list of consents, add the 'consents' el
         </agreement>
     </terms-of-service>
 ```
-
+* If you need to add HTML to the consent text, use a 'file' attribute instead of 'text':
+     ```xml
+     <consent id="newsletter" file="newsletterConsent.html" default="true"/>
+     ```
+     Put the consent HTML in the <TeamCity Data Directory>/config/termsOfService/newsletterConsent.html file.
+      
 * With such configuration a user will be asked to agree with two optional consents on the agreement page. 
 * A special tab will also be shown to the user in the 'My Settings & Tools' area. On this tab users can review and modify the list of accepted consents.
 

@@ -127,20 +127,37 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
                 for (Object consent : consentsEl.getChildren("consent")) {
                     Element consentEl = ((Element) consent);
                     String id = consentEl.getAttributeValue("id");
-                    String text = consentEl.getAttributeValue("text");
+                    String html;
+
+                    if (consentEl.getAttributeValue("file") != null) {
+                        File consentContentFile = myConfig.getConfigFile(consentEl.getAttributeValue("file"));
+                        if (consentContentFile.exists() && consentContentFile.isFile()) {
+                            try {
+                                html = FileUtil.readText(consentContentFile, "UTF-8");
+                            } catch (IOException e) {
+                                TermsOfServiceLogger.LOGGER.warnAndDebugDetails("Error while reading consent file from " + consentContentFile + " for agreement id = '" + agreementId + "'", e);
+                                continue;
+                            }
+                        } else {
+                            TermsOfServiceLogger.LOGGER.warn("Broken configuration: consent file '" + consentContentFile + "' doesn't exist for agreement id = '" + agreementId + "', consent is skipped");
+                            continue;
+                        }
+                    } else {
+                        html = consentEl.getAttributeValue("text");
+                    }
 
                     if (StringUtil.isEmptyOrSpaces(id)) {
                         TermsOfServiceLogger.LOGGER.warn("Broken configuration: missing consent id, the consent is ignored.");
                         continue;
                     }
 
-                    if (StringUtil.isEmptyOrSpaces(text)) {
-                        TermsOfServiceLogger.LOGGER.warn("Broken configuration: missing consent text, the consent is ignored.");
+                    if (StringUtil.isEmptyOrSpaces(html)) {
+                        TermsOfServiceLogger.LOGGER.warn("Broken configuration: missing consent text/file, the consent is ignored.");
                         continue;
                     }
 
                     boolean checked = Boolean.parseBoolean(consentEl.getAttributeValue("default"));
-                    consents.add(new ConsentImpl(id, text, checked, agreementId));
+                    consents.add(new ConsentImpl(id, html, checked, agreementId));
                 }
             }
 
@@ -482,7 +499,7 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
 
         @NotNull
         @Override
-        public String getText() {
+        public String getHtml() {
             return text;
         }
 
