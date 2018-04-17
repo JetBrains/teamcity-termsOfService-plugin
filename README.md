@@ -1,7 +1,7 @@
 
 # TeamCity Terms Of Services Plugin [![official JetBrains project](http://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 
-This TeamCity plugin allows displaying an additional license agreement (terms of services, privacy policy) to all the TeamCity server users and requiring users to accept the agreement before they can continue to interact with the service. The plugin can be useful for implementing GDPR requirements for a TeamCity installation.
+This TeamCity plugin allows displaying an additional agreement (terms of services, privacy policy) to all the TeamCity server users and requiring users to accept the agreement before they can continue to interact with the service. The plugin can be useful for implementing GDPR requirements for a TeamCity installation.
 
 As soon as the plugin is installed and configured correctly, all the newly logged in users will be redirected to the page with the text of the license agreement before they are able to perform any further actions. 
 This doesn't occur for the users who are currently using Web UI.
@@ -16,11 +16,12 @@ The plugin is compatible with TeamCity 2017.1 and later.
 The plugin is configured using the settings file `<TeamCity Data Directory>/config/termsOfService/settings.xml`. The file is automatically reloaded while the server is running. In case the file is invalid, teamcity-server.log gets related warnings of the "TermsOfService" category.
 
 Upon the first plugin installation, the default configuration is created in the "termsOfService" directory. This configuration is disabled and does not change any behavior.
-To activate the settings you should:
+
+To activate the settings, do the following:
 
 * modify the settings.xml file based on your needs (see possible configurations below). You can modify [Data Directory](https://confluence.jetbrains.com/display/TCD10/TeamCity+Data+Directory) content in the browser,
-* replace content of the agreement.html and/or guestNotice.html files with your agreements,
-* change values of 'enabled' attributes from 'false' to 'true' in the settings.xml file. 
+* replace the content of the agreement.html and/or guestNotice.html files with your agreements,
+* change the values of 'enabled' attributes from 'false' to 'true' in the settings.xml file. 
 
 
 ##### Force all users except guest to accept the agreement 
@@ -67,7 +68,7 @@ If you want any user (except guest) to be aware of a certain agreement, do the f
 
 ##### Test the agreement - show it to a single user only 
 
-If you want check how the agreement works you can enable it for the single user only:
+If you want check how the agreement works, you can enable it for a single user only:
 
 * Add 'user-filter' attribute to the 'agreement' element:
 ```xml
@@ -82,7 +83,7 @@ If you want check how the agreement works you can enable it for the single user 
         </agreement>
     </terms-of-service>
 ```
-* In the specified configuration the agreement will be shown to the 'admin' user only.
+* With the specified configuration the agreement will be shown to the 'admin' user only.
 
 ##### Show set of consents for users to agree/disagree 
 
@@ -105,7 +106,7 @@ If you want to ask users to agree with a list of consents, add the 'consents' el
         </agreement>
     </terms-of-service>
 ```
-* If you need to add HTML to the consent text, use a 'file' attribute instead of 'text':
+* If you need to add HTML to the consent text, use the 'file' attribute instead of 'text':
      ```xml
      <consent id="newsletter" file="newsletterConsent.html" default="true"/>
      ```
@@ -140,7 +141,7 @@ The data related to the agreement acceptance by a user is saved and can be fetch
 
 * _teamcity.termsOfService.<agreement_id>.acceptedDate_ - the date when the agreement was accepted
 * _teamcity.termsOfService.<agreement_id>.acceptedFromIP_ - the IP address of the request when the user accepts the agreement
-* _teamcity.termsOfService.<agreement_id>.acceptedVersion_ - the version of the agreement that was accepted by the user. 
+* _teamcity.termsOfService.<agreement_id>.acceptedVersion_ - the version of the agreement that was accepted by the user 
 * _teamcity.termsOfService.<agreement_id>.consent.<consent_id>.accepted_ - true if the consent was accepted
 * _teamcity.termsOfService.<agreement_id>.consent.<consent_id>.acceptedDate_ - the date when the consent was accepted
 * _teamcity.termsOfService.<agreement_id>.consent.<consent_id>.acceptedFromIP_ - the IP address of the request when the user accepts the consent
