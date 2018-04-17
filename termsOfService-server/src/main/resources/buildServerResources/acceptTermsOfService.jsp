@@ -42,7 +42,7 @@
         <form action="${pageUrl}" method="post">
           <div class="consentBlock">
             You are logged in as '<c:out value="${currentUser.descriptiveName}"/>'<c:if test="${fn:length(currentUser.email) > 0}"> (<c:out value="${currentUser.email}"/>)</c:if>.
-            Please accept the agreement to proceed.
+            Accept the agreement to proceed.
             <c:forEach var="consent" items="${agreement.consents}">
               <p>
                 <forms:checkbox name="${consent.id}" checked="${consent.checkedByDefault}"/>
