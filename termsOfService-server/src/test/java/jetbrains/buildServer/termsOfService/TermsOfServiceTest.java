@@ -539,7 +539,7 @@ public class TermsOfServiceTest extends BaseTestCase {
         FileUtil.writeFileAndReportErrors(guestNoticeFile, "Guest Notice");
 
         writeConfig("<terms-of-service>\n" +
-                "    <guest-notice enabled=\"false\">\n" +
+                "    <guest-notice enabled=\"true\">\n" +
                 "        <parameters>\n" +
                 "           \t<param name=\"content-file\" value=\"guestNotice.html\"/>\n" +
                 "            <param name=\"text\" value=\"A privacy reminder from JetBrains\"/>\n" +
@@ -551,12 +551,44 @@ public class TermsOfServiceTest extends BaseTestCase {
 
         login(userModel.getGuestUser());
         newRequest(HttpMethod.GET, "/");
+        then(guestNote.isAvailable(request)).isTrue();
+
+        replaceInSettingsFile("enabled=\"true\"", "enabled=\"false\"");
+        relogin();
+        newRequest(HttpMethod.GET, "/");
         then(guestNote.isAvailable(request)).isFalse();
 
         replaceInSettingsFile("enabled=\"false\"", "enabled=\"true\"");
         relogin();
         newRequest(HttpMethod.GET, "/");
         then(guestNote.isAvailable(request)).isTrue();
+    }
+
+    @Test
+    public void ability_to_remove_guest_notice() throws Exception {
+        File guestNoticeFile = new File(myAgreementFile.getParent(), "guestNotice.html");
+        FileUtil.createIfDoesntExist(guestNoticeFile);
+        FileUtil.writeFileAndReportErrors(guestNoticeFile, "Guest Notice");
+
+        writeConfig("<terms-of-service>\n" +
+                "    <guest-notice>\n" +
+                "        <parameters>\n" +
+                "           \t<param name=\"content-file\" value=\"guestNotice.html\"/>\n" +
+                "            <param name=\"text\" value=\"A privacy reminder from JetBrains\"/>\n" +
+                "            <param name=\"accepted-cookie-name\" value=\"privacy_policy_accepted\"/>\n" +
+                "            <param name=\"accepted-cookie-max-age-days\" value=\"10\"/>\n" +
+                "        </parameters>\n" +
+                "    </guest-notice>\n" +
+                "</terms-of-service>");
+
+        login(userModel.getGuestUser());
+        newRequest(HttpMethod.GET, "/");
+        then(guestNote.isAvailable(request)).isTrue();
+
+        writeConfig("<terms-of-service></terms-of-service>");
+        relogin();
+        newRequest(HttpMethod.GET, "/");
+        then(guestNote.isAvailable(request)).isFalse();
     }
 
     private void replaceInSettingsFile(@NotNull String replace, @NotNull String replacement) throws IOException {

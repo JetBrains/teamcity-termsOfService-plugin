@@ -197,6 +197,7 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
     }
 
     private void readGuestNotice(@NotNull Element config) {
+        myGuestNotice = null;
         Element guestNoticeEl = config.getChild("guest-notice");
         if (guestNoticeEl != null) {
 
