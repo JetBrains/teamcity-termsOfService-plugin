@@ -21,6 +21,7 @@
 
 .agreementForm .submitButton {
     margin-right: 0;
+    margin-top: 1em;
 }
 
 .licenseAgreementLink {
@@ -39,13 +40,14 @@
 
 #guestNotice {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
+    bottom: 1em;
+    left: 1em;
+    width: 30%;
     text-align: center;
     z-index: 4;
     opacity: 0.9;
-    background-color: #ffa;
-    border: 1px solid #8a8d7f;
-    padding: 1em;
+    background-color: #001c33;
+    border-radius: 3px;
+    padding-bottom: 1em;
+    color: white;
 }

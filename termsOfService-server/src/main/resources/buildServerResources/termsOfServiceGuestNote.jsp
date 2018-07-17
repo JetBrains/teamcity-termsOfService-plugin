@@ -7,7 +7,7 @@
 
     <div id="guestNotice" style="display: none;">
         <c:out value="${guestNotice.text}" />
-        <input class="btn btn_primary submitButton" style="margin-left: 1.5em;" type="button" value="Review now" onclick="BS.TermsOfServicesGuestNoteDialog.showCentered(); return false;"/>
+        <input class="btn btn_primary submitButton" style="margin-left: 1.5em;" type="button" value="Review now..." onclick="BS.TermsOfServicesGuestNoteDialog.showCentered(); return false;"/>
     </div>
 
 
@@ -21,7 +21,7 @@
             </div>
         </div>
 
-    </bs:dialog>
+    </bs:dialog>guestNotice
 
 
     <script type="text/javascript">
