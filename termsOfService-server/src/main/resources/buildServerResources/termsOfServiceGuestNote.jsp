@@ -21,7 +21,7 @@
             </div>
         </div>
 
-    </bs:dialog>guestNotice
+    </bs:dialog>
 
 
     <script type="text/javascript">
