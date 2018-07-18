@@ -208,11 +208,12 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
 
             Element paramsElement = guestNoticeEl.getChild("parameters");
             Map<String, String> params = paramsElement == null ? emptyMap() : XmlUtil.readParameters(paramsElement);
-            String text = params.get("text");
+            String title = params.get("title");
+            String note = params.get("note");
             String contentFile = params.get("content-file");
 
-            if (StringUtil.isEmptyOrSpaces(text)) {
-                TermsOfServiceLogger.LOGGER.warn("Broken configuration: missing guest notice text, the guest notice is ignored.");
+            if (StringUtil.isEmptyOrSpaces(title)) {
+                TermsOfServiceLogger.LOGGER.warn("Broken configuration: missing guest notice title, the guest notice is ignored.");
                 return;
             }
 
@@ -228,7 +229,7 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
                     String guestNoticeContent = FileUtil.readText(guestNoticeFile, "UTF-8");
                     String cookieName = params.getOrDefault("accepted-cookie-name", "guest-notice-accepted");
                     int cookieDurationMinutes = StringUtil.parseInt(params.getOrDefault("accepted-cookie-max-age-days", "30"), 30);
-                    myGuestNotice = new GuestNoticeSettings(text, guestNoticeContent, cookieName, cookieDurationMinutes);
+                    myGuestNotice = new GuestNoticeSettings(title, note, guestNoticeContent, cookieName, cookieDurationMinutes);
                 } catch (IOException e) {
                     TermsOfServiceLogger.LOGGER.warnAndDebugDetails("Error while reading guest notice content from " + guestNoticeFile, e);
                 }
@@ -435,21 +436,30 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
     }
 
     class GuestNoticeSettings implements GuestNotice {
-        private final String text;
+        private final String title;
+        private final String note;
         private final String htmlContent;
         private final String cookieName;
         private final int cookieDurationDays;
 
-        GuestNoticeSettings(@NotNull String text, @NotNull String htmlContent, @NotNull String cookieName, int cookieDurationDays) {
-            this.text = text;
+        GuestNoticeSettings(@NotNull String title,
+                            @Nullable String note,
+                            @NotNull String htmlContent, @NotNull String cookieName, int cookieDurationDays) {
+            this.title = title;
+            this.note = note;
             this.htmlContent = htmlContent;
             this.cookieName = cookieName;
             this.cookieDurationDays = cookieDurationDays;
         }
 
         @NotNull
-        public String getText() {
-            return text;
+        public String getTitle() {
+            return title;
+        }
+
+        @Nullable
+        public String getNote() {
+            return note;
         }
 
         @NotNull

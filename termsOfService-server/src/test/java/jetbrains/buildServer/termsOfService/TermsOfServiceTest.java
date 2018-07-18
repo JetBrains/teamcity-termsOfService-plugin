@@ -488,7 +488,8 @@ public class TermsOfServiceTest extends BaseTestCase {
                 "    <guest-notice>\n" +
                 "        <parameters>\n" +
                 "           \t<param name=\"content-file\" value=\"guestNotice.html\"/>\n" +
-                "            <param name=\"text\" value=\"A privacy reminder from JetBrains\"/>\n" +
+                "            <param name=\"title\" value=\"A privacy reminder from JetBrains\"/>\n" +
+                "            <param name=\"note\" value=\"To be consistent with data protection laws, we’re asking JetBrains users to review and agree to certain key points\"/>\n" +
                 "            <param name=\"accepted-cookie-name\" value=\"privacy_policy_accepted\"/>\n" +
                 "            <param name=\"accepted-cookie-max-age-days\" value=\"10\"/>\n" +
                 "        </parameters>\n" +
@@ -504,7 +505,8 @@ public class TermsOfServiceTest extends BaseTestCase {
                 .containsOnly("/viewTermsOfServices.html?agreement=privacy_policy");
 
         TermsOfServiceManager.GuestNotice guestNotice = (TermsOfServiceManager.GuestNotice) guestNoteExtension().get("guestNotice");
-        then(guestNotice.getText()).isEqualTo("A privacy reminder from JetBrains");
+        then(guestNotice.getTitle()).isEqualTo("A privacy reminder from JetBrains");
+        then(guestNotice.getNote()).isEqualTo("To be consistent with data protection laws, we’re asking JetBrains users to review and agree to certain key points");
         then(guestNotice.getHtml()).isEqualTo("Guest Notice");
         then(guestNotice.getCookieName()).isEqualTo("privacy_policy_accepted");
         then(guestNotice.getCookieDurationDays()).isEqualTo(10);
@@ -542,7 +544,7 @@ public class TermsOfServiceTest extends BaseTestCase {
                 "    <guest-notice enabled=\"true\">\n" +
                 "        <parameters>\n" +
                 "           \t<param name=\"content-file\" value=\"guestNotice.html\"/>\n" +
-                "            <param name=\"text\" value=\"A privacy reminder from JetBrains\"/>\n" +
+                "            <param name=\"title\" value=\"A privacy reminder from JetBrains\"/>\n" +
                 "            <param name=\"accepted-cookie-name\" value=\"privacy_policy_accepted\"/>\n" +
                 "            <param name=\"accepted-cookie-max-age-days\" value=\"10\"/>\n" +
                 "        </parameters>\n" +
@@ -574,7 +576,7 @@ public class TermsOfServiceTest extends BaseTestCase {
                 "    <guest-notice>\n" +
                 "        <parameters>\n" +
                 "           \t<param name=\"content-file\" value=\"guestNotice.html\"/>\n" +
-                "            <param name=\"text\" value=\"A privacy reminder from JetBrains\"/>\n" +
+                "            <param name=\"title\" value=\"A privacy reminder from JetBrains\"/>\n" +
                 "            <param name=\"accepted-cookie-name\" value=\"privacy_policy_accepted\"/>\n" +
                 "            <param name=\"accepted-cookie-max-age-days\" value=\"10\"/>\n" +
                 "        </parameters>\n" +

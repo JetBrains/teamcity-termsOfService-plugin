@@ -80,7 +80,10 @@ public interface TermsOfServiceManager {
     interface GuestNotice {
 
         @NotNull
-        String getText();
+        String getTitle();
+
+        @Nullable
+        String getNote();
 
         @NotNull
         String getHtml();

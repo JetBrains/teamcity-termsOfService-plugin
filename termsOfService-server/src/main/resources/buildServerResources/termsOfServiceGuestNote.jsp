@@ -6,12 +6,17 @@
     </bs:linkCSS>
 
     <div id="guestNotice" style="display: none;">
-        <c:out value="${guestNotice.text}" />
-        <input class="btn btn_primary submitButton" style="margin-left: 1.5em;" type="button" value="Review now..." onclick="BS.TermsOfServicesGuestNoteDialog.showCentered(); return false;"/>
+        <div class="content">
+            <div class="caption">${guestNotice.title}</div>
+            <c:if test="${not empty guestNotice.note}">
+                <div class="note">${guestNotice.note}</div>
+            </c:if>
+            <div class="actions"><input class="btn btn_primary submitButton" type="button" value="Review now..." onclick="BS.TermsOfServicesGuestNoteDialog.showCentered(); return false;"/></div>
+        </div>
     </div>
 
 
-    <bs:dialog dialogId="agreementDialog" closeCommand="BS.TermsOfServicesGuestNoteDialog.close();" title="${guestNotice.text}" dialogClass="modalDialog agreementDialog">
+    <bs:dialog dialogId="agreementDialog" closeCommand="BS.TermsOfServicesGuestNoteDialog.close();" title="${guestNotice.title}" dialogClass="modalDialog agreementDialog">
         <div style="max-height: 35em; overflow: scroll;" >
             ${guestNotice.html}
 

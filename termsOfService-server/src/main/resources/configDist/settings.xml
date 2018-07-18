@@ -24,8 +24,11 @@
             <!-- Path to the file containing notice html, relative to the <TeamCity Data Directory>/config/termsOfService/ directory  -->
             <param name="content-file" value="guestNotice.html"/>
 
-            <!-- Short text to be shown in the notice-->
-            <param name="text" value="A privacy reminder"/>
+            <!-- Short title to be shown in the notice-->
+            <param name="title" value="A privacy reminder"/>
+
+            <!-- Extended description to be shown in the notice (can be omitted)-->
+            <param name="note" value="To be consistent with data protection laws, we’re asking users to review and agree to certain key points"/>
 
             <!-- The name of the cookie where the fact of acceptance is saved -->
             <param name="accepted-cookie-name" value="guest-notice-accepted"/>

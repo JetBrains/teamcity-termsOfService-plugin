@@ -42,12 +42,41 @@
     position: fixed;
     bottom: 1em;
     left: 1em;
-    width: 30%;
-    text-align: center;
+    width: 22em;
+    text-align: left;
     z-index: 4;
     opacity: 0.9;
     background-color: #001c33;
     border-radius: 3px;
     padding-bottom: 1em;
+    padding-right: 1em;
+    padding-left: 4em;
     color: white;
+}
+
+#guestNotice .note {
+    padding-top: 0.5em;
+}
+
+#guestNotice .caption{
+    font-weight: bolder;
+    padding-top: 1em;
+}
+
+#guestNotice .actions{
+    padding-top: 1em;
+}
+
+#guestNotice .content::before{
+    position: absolute;
+    left: 22px;
+    top: 12px;
+    content: "!";
+    border-radius: 50%;
+    border: 1px solid white;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    text-align: center;
+    font-weight: bolder;
 }
