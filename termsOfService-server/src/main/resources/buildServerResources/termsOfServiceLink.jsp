@@ -30,7 +30,11 @@
             updateFooter: function(){
                 var element = $j(".column3 .columnContent");
                 var html = element.html();
-                element.html(html + $j("#tsLinks").html());
+                var insert = $j("#tsLinks").html();
+                element.html(html + insert);
+                if (window.ReactUI && window.ReactUI.insertHtmlExtension) {
+                    window.ReactUI.insertHtmlExtension('tsLinks', 'FOOTER_LINKS', insert);
+                }
             }
         };
         $j(document).ready(function() {
