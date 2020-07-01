@@ -25,6 +25,7 @@ import static java.util.stream.Collectors.toList;
 @ThreadSafe
 public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
     private static final String TEAMCITY_TERMS_OF_SERVICE_ENABLED_PROPERTY = "teamcity.termsOfService.enabled";
+    private static final String TEAMCITY_TERMS_OF_SERVICE_ASK_SUPER_USER_PROPERTY = "teamcity.termsOfService.askSuperUser";
     private static final String ACCEPTED_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
     @NotNull
@@ -251,6 +252,10 @@ public class TermsOfServiceManagerImpl implements TermsOfServiceManager {
         }
 
         if (userModel.isGuestUser(user)) {
+            return Collections.emptyList();
+        }
+
+        if (userModel.isSuperUser(user) && !TeamCityProperties.getBooleanOrTrue(TEAMCITY_TERMS_OF_SERVICE_ASK_SUPER_USER_PROPERTY)) {
             return Collections.emptyList();
         }
 
