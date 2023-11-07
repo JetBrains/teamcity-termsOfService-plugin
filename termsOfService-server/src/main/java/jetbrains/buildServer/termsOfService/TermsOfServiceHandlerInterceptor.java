@@ -55,7 +55,7 @@ public class TermsOfServiceHandlerInterceptor implements TeamCityHandlerIntercep
             return true;
         }
 
-        if (!path.startsWith(AcceptTermsOfServiceController.PATH)) {
+        if (!path.startsWith(AcceptTermsOfServiceController.PATH) && !Boolean.parseBoolean(session.getAttribute("CHANGE_PASSWORD_REQUIRED_ATTRIBUTE").toString())) {
             String entryPoint = AcceptTermsOfServiceController.PATH + "?agreement=" + agreement.getId() + "&" + PROCEED_URL_PARAM + "=" + WebUtil.encode(WebUtil.getRequestUrl(request));
             TermsOfServiceLogger.LOGGER.debug("Redirecting " + WebUtil.getRequestDump(request) + " to " + entryPoint);
             response.sendRedirect(request.getContextPath() + entryPoint);
